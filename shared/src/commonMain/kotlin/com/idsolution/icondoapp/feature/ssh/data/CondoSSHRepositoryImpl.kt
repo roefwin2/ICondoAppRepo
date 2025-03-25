@@ -3,10 +3,10 @@ package com.example.testkmpapp.feature.ssh.data
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result
-import com.example.testkmpapp.feature.ssh.data.models.SitesDto
+import com.idsolution.icondoapp.feature.ssh.data.models.sites.SitesDto
 import com.example.testkmpapp.feature.ssh.data.models.StartTunnelRequest
 import com.example.testkmpapp.feature.ssh.data.models.SubmitLoginRequest
-import com.example.testkmpapp.feature.ssh.data.models.toDomain
+import com.idsolution.icondoapp.feature.ssh.data.models.sites.toDomain
 import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import io.ktor.client.HttpClient
@@ -97,12 +97,12 @@ class CondoSSHRepositoryImpl(
     }
 
     override suspend fun unlockDoor(
-        lobbyDoor: Int,
+        doorId: Int,
         siteName: String
     ): Result<String, DataError.Network> =
         withContext(Dispatchers.IO) {
             val response = httpClient.get(
-                urlString = "https://api.i-dsolution.com/sites/unlockDoor?lobbyDoor=$lobbyDoor&siteName=$siteName"
+                urlString = "https://api.i-dsolution.com/sites/unlockDoor?doorId=$doorId&siteName=$siteName"
             )
             if (response.status.isSuccess()) {
                 Result.Success("Success")

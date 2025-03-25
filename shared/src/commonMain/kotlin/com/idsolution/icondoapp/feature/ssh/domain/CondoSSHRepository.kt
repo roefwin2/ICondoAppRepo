@@ -22,7 +22,7 @@ interface CondoSSHRepository {
     ): EmptyDataResult<DataError.Network>
 
     suspend fun unlockDoor(
-        lobbyDoor: Int,
+        doorId: Int,
         siteName: String
     ): Result<String, DataError.Network>
 

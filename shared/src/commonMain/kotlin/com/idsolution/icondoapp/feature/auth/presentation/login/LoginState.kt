@@ -1,8 +1,7 @@
 package com.example.testkmpapp.feature.auth.presentation.login
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.input.TextFieldState
-import com.example.testkmpapp.feature.ssh.data.models.SiteDto
+import com.idsolution.icondoapp.feature.ssh.data.models.sites.SiteDto
 
 data class LoginState(
     val email: TextFieldState = TextFieldState(),

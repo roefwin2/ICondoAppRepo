@@ -2,13 +2,17 @@ package com.example.testkmpapp.feature.ssh.presenter.sites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.testkmpapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.core.presentation.helper.Loading
 import com.idsolution.icondoapp.core.presentation.helper.Resource
 import com.idsolution.icondoapp.core.presentation.helper.Success
 import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
+import com.example.testkmpapp.feature.ssh.domain.models.Door
 import com.example.testkmpapp.feature.ssh.domain.usecases.OpenDoorUseCase
+import com.idsolution.icondoapp.core.data.networking.map
+import com.idsolution.icondoapp.core.presentation.helper.Idle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -16,7 +20,8 @@ import kotlinx.coroutines.launch
 
 class CondoSitesViewModel(
     private val openDoorUseCase: OpenDoorUseCase,
-    private val condoSSHRepository: CondoSSHRepository
+    private val condoSSHRepository: CondoSSHRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<CondoSitesState> = MutableStateFlow(CondoSitesState())
@@ -24,10 +29,21 @@ class CondoSitesViewModel(
 
     init {
         viewModelScope.launch {
-            val result = condoSSHRepository.domains()
-            if (result is Result.Success) {
+            val result = authRepository.loggedUser
+            val condoSites = condoSSHRepository.domains()
+            if (result != null  && condoSites is Result.Success) {
+                val currentCondoSite = condoSites.data.firstOrNull { it.siteName == result.siteName }
                 _state.update {
-                    CondoSitesState(result.data)
+                    CondoSitesState(
+                        listOf(
+                            CondoSite(
+                                result.siteName,
+                                currentCondoSite?.host ?:"",
+                                currentCondoSite?.port ?: 0,
+                                result.accessDoors.map { Door("Door $it", Idle(), it) }.toSet()
+                            )
+                        )
+                    )
                 }
             }
         }

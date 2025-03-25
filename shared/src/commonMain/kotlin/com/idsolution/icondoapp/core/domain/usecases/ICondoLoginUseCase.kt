@@ -22,7 +22,8 @@ class ICondoLoginUseCase(
             emit(result)
         }
         if (result is Result.Success) {
-            emit(result)
+           val userInfos = authRepository.getUser(email)
+            emit(userInfos)
         }
     }
 }

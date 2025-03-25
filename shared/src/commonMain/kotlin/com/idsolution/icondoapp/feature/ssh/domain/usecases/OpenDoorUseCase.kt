@@ -32,7 +32,7 @@ class OpenDoorUseCase(
             DataError.Network.SERVER_ERROR
         )
         val result =
-            condoSSHRepository.unlockDoor(lobbyDoor = door, siteName = condoSite.siteName)
+            condoSSHRepository.unlockDoor(doorId = door, siteName = condoSite.siteName)
         return if (result is Result.Success) {
             Result.Success(Unit)
         } else {
