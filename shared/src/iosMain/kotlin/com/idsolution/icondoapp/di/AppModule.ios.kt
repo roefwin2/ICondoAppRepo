@@ -9,3 +9,5 @@ actual val platformModule: Module
     get() = module{
         single<HttpClientEngine> { Darwin.create()  }
     }
+actual val voipModule: Module
+    get() = TODO("Not yet implemented")

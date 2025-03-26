@@ -6,8 +6,12 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import com.example.testkmpapp.di.initKoin
+import com.example.voip.voip.core.di.coreModule
+import com.example.voip.voip.data.di.voipDataModule
+import com.example.voip.voip.presenter.di.voipViewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.dsl.module
 import timber.log.Timber
 
 class CondoApplication : Application() {

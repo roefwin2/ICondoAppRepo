@@ -14,3 +14,4 @@ val shareModule = module {
         HttpClientFactory(get()).build(get())
     }
 }
+expect val voipModule: Module

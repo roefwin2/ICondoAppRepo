@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Permissions pour le foregroundServiceType: camera -->
+    <uses-permission android:name="android.permission.CAMERA"
+        android:protectionLevel="normal"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_CAMERA"
+        android:protectionLevel="normal"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- Permissions pour le foregroundServiceType: location -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+        android:minSdkVersion="33"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Permissions pour le foregroundServiceType: microphone -->
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
+        android:protectionLevel="normal"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
+        android:protectionLevel="normal"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
+        android:protectionLevel="normal"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.CAPTURE_TUNER_AUDIO_INPUT"
+        android:protectionLevel="normal"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT"
+        android:protectionLevel="normal"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"
+        android:protectionLevel="normal"/>
+
+    <!-- Permissions pour le foregroundServiceType: phoneCall -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Condo"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/TextAppearance.Compat.Notification">
+        <activity
+            android:name=".voip.presenter.call.activities.CallingActivity"
+            android:exported="true"
+            android:label="Calling"
+            android:theme="@style/Theme.AppCompat">
+        </activity>
+
+        <service
+            android:name="org.linphone.core.tools.service.CoreService"
+            android:foregroundServiceType="phoneCall|camera|microphone|location"
+            android:stopWithTask="false" />
+
+    </application>
+
+</manifest>

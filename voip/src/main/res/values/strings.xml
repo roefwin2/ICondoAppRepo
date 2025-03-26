@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_service_id">1</string>
+    <string name="notification_channel_incoming_call_id">1</string>
+    <string name="notification_channel_incoming_call_name">Test</string>
+    <string name="accept_call">Accepter\n</string>
+    <string name="reject_call">Rejeter</string>
+</resources>

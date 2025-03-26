@@ -22,7 +22,8 @@ fun initKoin(config: KoinAppDeclaration? = null) {
             sshDataModule,
             sshDomainModule,
             sshViewModelModule,
-            platformModule
+            platformModule,
+            voipModule
         )
     }
 }
