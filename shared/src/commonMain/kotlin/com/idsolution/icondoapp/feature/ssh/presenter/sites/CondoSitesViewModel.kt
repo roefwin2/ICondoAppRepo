@@ -31,7 +31,7 @@ class CondoSitesViewModel(
         viewModelScope.launch {
             val result = authRepository.loggedUser
             val condoSites = condoSSHRepository.domains()
-            if (result != null  && condoSites is Result.Success) {
+            if (result?.siteName != null && condoSites is Result.Success) {
                 val currentCondoSite = condoSites.data.firstOrNull { it.siteName == result.siteName }
                 _state.update {
                     CondoSitesState(

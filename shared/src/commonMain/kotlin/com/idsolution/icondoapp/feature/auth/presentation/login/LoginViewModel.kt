@@ -1,5 +1,6 @@
 package com.example.testkmpapp.feature.auth.presentation.login
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,7 +33,12 @@ class LoginViewModel(
                     isPasswordVisible = !state.isPasswordVisible
                 )
             }
-
+            is LoginAction.OnLoginChanged -> {
+                state = state.copy(
+                    email = TextFieldState(action.email),
+                    password = TextFieldState(action.password)
+                )
+            }
             else -> Unit
         }
     }
@@ -43,10 +49,7 @@ class LoginViewModel(
             iCondoLoginUseCase.invoke(
                 email = state.email.text.toString().trim(),
                 password = state.password.text.toString(),
-                voipUsername = "regis_test",
-                voiPassword = "e1d2o3U4",
-                domain = "sip.linphone.org",
-            ).collectLatest { result ->
+            ).collect { result ->
                 state = state.copy(isLoggingIn = false)
                 when (result) {
                     is Result.Error -> {

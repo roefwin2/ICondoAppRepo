@@ -9,6 +9,9 @@ import com.example.testkmpapp.feature.ssh.data.models.SubmitLoginRequest
 import com.idsolution.icondoapp.feature.ssh.data.models.sites.toDomain
 import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
+import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.PhoneBookDtoItem
+import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.toDomain
+import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -39,6 +42,24 @@ class CondoSSHRepositoryImpl(
                 val sitesDto =
                     json.decodeFromString<SitesDto>(response.body())
                 Result.Success(sitesDto.toDomain())
+            } else {
+                Result.Error(DataError.Network.SERVER_ERROR)
+            }
+        }
+
+    override suspend fun phonebook(siteName: String): Result<List<PhoneBook>, DataError.Network> =
+        withContext(Dispatchers.IO) {
+
+            val response = httpClient.get(urlString = "https://api.i-dsolution.com/sites/phonebook?siteName=$siteName")
+
+            if (response.status.isSuccess()) {
+                val json =
+                    Json {
+                        ignoreUnknownKeys = true
+                    } // Pour ignorer les clés inconnues si nécessaire
+                val phoneBook =
+                    json.decodeFromString<List<PhoneBookDtoItem>>(response.body())
+                Result.Success(phoneBook.map { it.toDomain() })
             } else {
                 Result.Error(DataError.Network.SERVER_ERROR)
             }

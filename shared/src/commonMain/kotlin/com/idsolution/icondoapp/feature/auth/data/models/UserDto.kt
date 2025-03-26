@@ -8,23 +8,23 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserDto(
     @SerialName("acces")
-    val acces: Acces,
+    val acces: Acces?,
     @SerialName("enabled")
     val enabled: Int,
     @SerialName("id")
     val id: Int,
     @SerialName("lastname")
-    val lastname: String,
+    val lastname: String?,
     @SerialName("site_name")
-    val siteName: String,
+    val siteName: String?,
     @SerialName("username")
     val username: String
 )
 
 fun UserDto.toDomain() = ICondoUser(
     username = username,
-    lastname = lastname,
+    lastname = lastname.toString(),
     siteName = siteName,
-    accessDoors = acces.doors.toSet(),
-    keyTags = acces.keytags.toSet()
+    accessDoors = acces?.doors?.toSet() ?: emptySet(),
+    keyTags = acces?.keytags?.toSet() ?: emptySet()
 )

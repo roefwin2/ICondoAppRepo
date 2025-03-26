@@ -7,6 +7,7 @@ import com.idsolution.icondoapp.feature.auth.domain.models.ICondoUser
 
 interface AuthRepository {
     val loggedUser : ICondoUser?
-    suspend fun login(email: String, password: String): EmptyDataResult<DataError.Network>
-    suspend fun getUser(userName : String): EmptyDataResult<DataError.Network>
+    suspend fun login(email: String, password: String): Result<Unit,DataError.Network>
+    suspend fun  signup(firstName: String, lastName: String,email: String, password: String): Result<Unit,DataError.Network>
+    suspend fun getUser(userName : String): Result<Unit,DataError.Network>
 }

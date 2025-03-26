@@ -31,7 +31,11 @@ import com.example.voip.voip.presenter.TextureViewScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ContactsScreen(viewModel: ContactsViewModel = koinViewModel(), onCallClick: (String) -> Unit) {
+fun ContactsScreen(
+    viewModel: ContactsViewModel = koinViewModel(),
+    contacts: List<Contact>,
+    onCallClick: (String) -> Unit
+) {
     var phoneNumber by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
@@ -58,12 +62,12 @@ fun ContactsScreen(viewModel: ContactsViewModel = koinViewModel(), onCallClick: 
         }
 
         LazyColumn {
-            items(viewModel.contacts) { contact ->
+            items(contacts) { contact ->
                 ContactItem(
                     contact = contact,
                     onCallClick = {
                         onCallClick.invoke("")
-                        viewModel.callNumber("")
+                        viewModel.callNumber(contact.number)
                     }
                 )
             }
@@ -96,7 +100,7 @@ fun ContactItem(contact: Contact, onCallClick: () -> Unit) {
 @Composable
 fun ContactsScreenPreview() {
     MaterialTheme {
-        ContactsScreen {}
+        ContactsScreen(contacts = emptyList()) {}
     }
 }
 

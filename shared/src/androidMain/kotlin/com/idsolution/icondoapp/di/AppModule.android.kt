@@ -7,6 +7,7 @@ import com.example.voip.voip.presenter.call.CallViewModel
 import com.example.voip.voip.presenter.call.activities.VideoCallViewModel
 import com.example.voip.voip.presenter.contacts.ContactsViewModel
 import com.example.voip.voip.presenter.di.voipViewModelModule
+import com.idsolution.icondoapp.feature.voip.VoipViewModel
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -25,5 +26,6 @@ actual val voipModule: Module
         viewModelOf(::ContactsViewModel)
         viewModelOf(::CallViewModel)
         viewModelOf(::VideoCallViewModel)
+        viewModelOf(::VoipViewModel)
         singleOf(::ICondoLinphoneImpl).bind<ICondoVoip>()
     }

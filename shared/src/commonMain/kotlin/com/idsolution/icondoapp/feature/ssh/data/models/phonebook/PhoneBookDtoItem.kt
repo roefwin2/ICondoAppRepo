@@ -1,6 +1,7 @@
 package com.idsolution.icondoapp.feature.ssh.data.models.phonebook
 
 
+import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,3 +28,5 @@ data class PhoneBookDtoItem(
     @SerialName("towerno")
     val towerno: String
 )
+
+fun PhoneBookDtoItem.toDomain() = PhoneBook(dialno, firstname, lastname, phone)

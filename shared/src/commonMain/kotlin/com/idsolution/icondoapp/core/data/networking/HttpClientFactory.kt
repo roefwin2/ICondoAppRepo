@@ -67,6 +67,7 @@ class HttpClientFactory(
                                 }
                             }
                         )
+                        val authInfos = sessionStorage.get()
                         if (response.status.isSuccess()) {
                             val json =
                                 Json {
@@ -76,7 +77,7 @@ class HttpClientFactory(
                                 json.decodeFromString<AccessTokenResponse>(response.body())
                             val newAuthInfo = AuthInfo(
                                 accessToken = accessTokenResponse.accessToken,
-                                userId = accessTokenResponse.jti
+                                username = authInfos?.username ?: ""
                             )
                             sessionStorage.set(newAuthInfo)
                             BearerTokens(

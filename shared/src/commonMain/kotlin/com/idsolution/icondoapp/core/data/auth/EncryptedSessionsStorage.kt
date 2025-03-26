@@ -20,10 +20,13 @@ class EncryptedSessionsStorage(
             val accessToken = dataStore.data.map {
                 it[stringPreferencesKey(KEY_AUTH_INFO)]
             }.first()
-            if (accessToken == null) {
+            val username = dataStore.data.map {
+                it[stringPreferencesKey(USERNAME_AUTH_INFO)]
+            }.first()
+            if (accessToken == null || username == null) {
                 null
             } else {
-                AuthInfo(accessToken = accessToken, userId = "")
+                AuthInfo(accessToken = accessToken, username = username)
             }
         }
     }
@@ -31,18 +34,28 @@ class EncryptedSessionsStorage(
     override suspend fun set(info: AuthInfo?) {
         withContext(Dispatchers.IO) { // Blocking
             if (info == null) {
-                dataStore.edit{ dataStore ->
+                dataStore.edit { dataStore ->
                     dataStore.remove(stringPreferencesKey(KEY_AUTH_INFO))
+                    dataStore.remove(stringPreferencesKey(USERNAME_AUTH_INFO))
                 }
                 return@withContext
             }
             dataStore.edit { dataStore ->
                 dataStore[stringPreferencesKey(KEY_AUTH_INFO)] = info.accessToken
+                dataStore[stringPreferencesKey(USERNAME_AUTH_INFO)] = info.username
             }
+        }
+    }
+
+    override suspend fun clear() {
+        dataStore.edit { dataStore ->
+            dataStore.remove(stringPreferencesKey(KEY_AUTH_INFO))
+            dataStore.remove(stringPreferencesKey(USERNAME_AUTH_INFO))
         }
     }
 
     companion object {
         private const val KEY_AUTH_INFO = "KEY_AUTH_INFO"
+        private const val USERNAME_AUTH_INFO = "USERNAME_AUTH_INFO"
     }
 }

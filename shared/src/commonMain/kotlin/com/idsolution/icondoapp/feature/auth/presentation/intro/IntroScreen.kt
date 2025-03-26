@@ -72,7 +72,7 @@ fun IntroScreen(
                 isLoading = false,
                 modifier = Modifier.fillMaxSize(),
                 onClick = {
-                    onAction.invoke(IntroAction.OnSignInClick)
+                    onAction.invoke(IntroAction.OnSignUpClick)
                 }
             )
             Spacer(modifier = Modifier.height(16.dp))

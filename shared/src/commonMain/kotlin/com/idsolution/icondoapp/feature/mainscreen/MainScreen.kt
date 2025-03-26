@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,14 +38,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.testkmpapp.feature.ssh.presenter.places.PlacesScreen
+import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
 import com.idsolution.icondoapp.feature.voip.NativeVoipScreen
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 
+@OptIn(KoinExperimentalAPI::class)
 @Composable
-fun MainScreen(onIncomingCall: ((String) -> Unit)) {
+fun MainScreen(
+    mainViewModel: MainViewModel = koinViewModel(),
+    onIncomingCall: ((String) -> Unit),
+    onLogout: () -> Unit
+) {
     var selectedTab by remember { mutableStateOf(0) }
 
+    val mainState = mainViewModel.state.value
+    val username = mainState.username
+
     Scaffold(
-        topBar = { CustomTopAppBar(title = getScreenTitle(selectedTab)) },
+        topBar = { CustomTopAppBar(title = getScreenTitle(selectedTab), username = username) },
         bottomBar = { BottomNavigationBar(selectedTab) { selectedTab = it } }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -72,7 +84,14 @@ fun MainScreen(onIncomingCall: ((String) -> Unit)) {
                     }
 
                     2 -> {
-                        // VideoScreen()
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Button(onClick = { onLogout.invoke() }) {
+                                Text("Deconnexion")
+                            }
+                        }
                     }
 
                 }
@@ -83,7 +102,7 @@ fun MainScreen(onIncomingCall: ((String) -> Unit)) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomTopAppBar(title: String) {
+fun CustomTopAppBar(title: String, username: String) {
     TopAppBar(
         colors = TopAppBarColors(
             titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -94,7 +113,7 @@ fun CustomTopAppBar(title: String) {
         ),
         title = {
             Column {
-                Text(text = "Salut David", fontSize = 12.sp, color = Color.Gray)
+                Text(text = "Salut $username", fontSize = 12.sp, color = Color.Gray)
                 Text(text = title, fontSize = 18.sp)
             }
         },
