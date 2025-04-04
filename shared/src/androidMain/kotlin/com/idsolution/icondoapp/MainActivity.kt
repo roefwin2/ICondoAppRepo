@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.example.testkmpapp.feature.mainscreen.NavigationRoot
 import com.example.testkmpapp.theme.CondoTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.linphone.core.tools.service.CoreService
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +31,7 @@ class MainActivity : ComponentActivity() {
         ) {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 0)
         }
+        requestPermissions()
         enableEdgeToEdge()
         setContent {
             CondoTheme {
@@ -42,6 +45,19 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // Exemple de code pour demander les permissions à l'exécution
+    private fun requestPermissions() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.POST_NOTIFICATIONS
+            ),
+            0
+        )
     }
 
     private fun showNotification(title: String) {

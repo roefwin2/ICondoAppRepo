@@ -260,7 +260,7 @@ class CallService : CoreService() {
         val notification = createIncomingCallNotification(
             context = this,
             channelId = "condo_channel_id",
-            callerName = "John Doe",
+            callerName = "Service Voip activé",
             phoneNumber = "+33612345678",
             acceptCallIntent = pendingIntent,
             rejectCallIntent = pendingIntent
