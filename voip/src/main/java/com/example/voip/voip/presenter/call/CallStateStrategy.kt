@@ -1,5 +1,6 @@
 package com.example.voip.voip.presenter.call
 
+import android.view.TextureView
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,48 +18,230 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.voip.voip.presenter.TextureViewScreen
 import com.example.voip.voip.presenter.call.activities.ControlBar
 import com.example.voip.voip.presenter.call.activities.MainCallScreen
 import com.example.voip.voip.presenter.call.activities.VideoCallViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.linphone.core.Call
 import org.linphone.core.Call.State
+import org.linphone.mediastream.video.capture.CaptureTextureView
 
 @Composable
 fun CallStateDisplay(
-    callState: Call.State,
-    modifier: Modifier = Modifier
+    phoneNumber: String,
+    call: Call.State,
+    onIncomingCall: ((String) -> Unit),
+    onEndCall: () -> Unit,
+    onInitVideo: ((TextureView, CaptureTextureView) -> Unit),
+    onToggleVideo: () -> Unit,
+    onToggleCamera: () -> Unit
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        AnimatedContent(
-            targetState = callState,
-            label = "call_state_transition"
-        ) { state ->
-            when (state) {
-                Call.State.Idle -> IdleState()
-                State.PushIncomingReceived, State.IncomingReceived, State.IncomingEarlyMedia -> IncomingState()
-                State.StreamsRunning -> VideoCallScreen {  }
-                Call.State.OutgoingInit -> OutgoingInitState()
-                Call.State.OutgoingProgress -> OutgoingProgressState()
-                Call.State.OutgoingRinging -> OutgoingRingingState()
-                Call.State.OutgoingEarlyMedia -> EarlyMediaState()
-                Call.State.Connected -> ConnectedState()
-                Call.State.Error -> ErrorState()
-                Call.State.End,State.Released -> EndState()
-                Call.State.UpdatedByRemote -> UpdatedByRemoteState()
-                else -> UnknownState()
+    var isVideoEnabled by remember { mutableStateOf(false) }
+
+    when (call) {
+        Call.State.OutgoingRinging, Call.State.Idle, Call.State.OutgoingInit, Call.State.OutgoingProgress -> {
+            // Écran d'appel sortant
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF121212)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // Affichage du numéro de téléphone
+                    Text(
+                        text = "Calling $phoneNumber",
+                        color = Color.White,
+                        fontSize = 24.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
+                    )
+
+                    // Boutons de contrôle
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Bouton vidéo
+                        IconButton(
+                            onClick = {
+                                isVideoEnabled = !isVideoEnabled
+                                onToggleVideo()
+                            },
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Gray, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = if (isVideoEnabled) Icons.Default.Videocam else Icons.Default.VideocamOff,
+                                contentDescription = "Toggle Video",
+                                tint = Color.White
+                            )
+                        }
+
+                        // Bouton fin d'appel
+                        IconButton(
+                            onClick = onEndCall,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Red, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CallEnd,
+                                contentDescription = "End Call",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+            }
+        }
+
+        Call.State.PushIncomingReceived, Call.State.IncomingReceived, Call.State.IncomingEarlyMedia -> {
+            // Appel en réception - déléguer à un autre composant via callback
+            onIncomingCall.invoke(call.name)
+        }
+
+        Call.State.Connected, Call.State.StreamsRunning -> {
+            // Appel connecté - afficher les vues vidéo
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF121212))
+            ) {
+                // Vues vidéo (si la vidéo est activée)
+                TextureViewScreen(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray),
+                    onTextureAvailable = {
+                    },
+                    onInitVideo = onInitVideo
+                )
+
+                // Superposer les contrôles
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Boutons de contrôle pour l'appel en cours
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        // Bouton vidéo
+                        IconButton(
+                            onClick = {
+                                isVideoEnabled = !isVideoEnabled
+                                onToggleVideo()
+                            },
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Gray, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = if (isVideoEnabled) Icons.Default.Videocam else Icons.Default.VideocamOff,
+                                contentDescription = "Toggle Video",
+                                tint = Color.White
+                            )
+                        }
+
+                        // Bouton fin d'appel
+                        IconButton(
+                            onClick = onEndCall,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Red, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CallEnd,
+                                contentDescription = "End Call",
+                                tint = Color.White
+                            )
+                        }
+
+                        // Bouton bascule caméra (avant/arrière)
+                        IconButton(
+                            onClick = onToggleCamera,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Gray, CircleShape),
+                            enabled = isVideoEnabled
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Videocam,
+                                contentDescription = "Switch Camera",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+        }
+
+        Call.State.Released -> {
+            // Appel terminé
+            onEndCall.invoke()
+        }
+
+        else -> {
+            // États non gérés spécifiquement
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF121212)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Call state: ${call.name}",
+                        color = Color.White,
+                        fontSize = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    IconButton(
+                        onClick = onEndCall,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(Color.Red, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CallEnd,
+                            contentDescription = "End Call",
+                            tint = Color.White
+                        )
+                    }
+                }
             }
         }
     }

@@ -35,22 +35,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.voip.voip.presenter.TextureViewScreen
 import org.linphone.core.Call
-import org.linphone.core.Call.State
-import org.linphone.core.tools.service.CoreService
 import org.linphone.mediastream.video.capture.CaptureTextureView
 
 @Composable
 fun CallScreen(
     phoneNumber: String,
     call: Call.State,
-    onIncomingCall: ((String) -> Unit),
+    //onIncomingCall: ((String) -> Unit),
     onEndCall: () -> Unit,
     onInitVideo: ((TextureView, CaptureTextureView) -> Unit),
-    onToggleCamera: (Boolean) -> Unit
+    onToggleVideo: () -> Unit,
+    onToggleCamera: () -> Unit
 ) {
-    var isCameraEnabled by remember { mutableStateOf(false) }
+    var isVideoEnabled by remember { mutableStateOf(false) }
+
     when (call) {
-        State.OutgoingRinging, State.Idle -> {
+        Call.State.OutgoingRinging, Call.State.Idle, Call.State.OutgoingInit, Call.State.OutgoingProgress -> {
+            // Écran d'appel sortant
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -64,7 +65,7 @@ fun CallScreen(
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Phone number display
+                    // Affichage du numéro de téléphone
                     Text(
                         text = "Calling $phoneNumber",
                         color = Color.White,
@@ -73,31 +74,29 @@ fun CallScreen(
                         modifier = Modifier.padding(16.dp)
                     )
 
-                    // Buttons
+                    // Boutons de contrôle
                     Row(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        // Bouton vidéo
                         IconButton(
                             onClick = {
-                                isCameraEnabled = !isCameraEnabled
-                                onToggleCamera(isCameraEnabled)
+                                isVideoEnabled = !isVideoEnabled
+                                onToggleVideo()
                             },
                             modifier = Modifier
                                 .size(64.dp)
                                 .background(Color.Gray, CircleShape)
                         ) {
                             Icon(
-                                imageVector = if (isCameraEnabled) {
-                                    Icons.Default.Videocam // Replace with appropriate icon
-                                } else {
-                                    Icons.Default.VideocamOff // Replace with appropriate icon
-                                },
-                                contentDescription = "Toggle Camera",
+                                imageVector = if (isVideoEnabled) Icons.Default.Videocam else Icons.Default.VideocamOff,
+                                contentDescription = "Toggle Video",
                                 tint = Color.White
                             )
                         }
 
+                        // Bouton fin d'appel
                         IconButton(
                             onClick = onEndCall,
                             modifier = Modifier
@@ -105,7 +104,7 @@ fun CallScreen(
                                 .background(Color.Red, CircleShape)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.CallEnd, // Replace with appropriate icon
+                                imageVector = Icons.Default.CallEnd,
                                 contentDescription = "End Call",
                                 tint = Color.White
                             )
@@ -117,23 +116,133 @@ fun CallScreen(
             }
         }
 
-        State.PushIncomingReceived,State.IncomingReceived,State.IncomingEarlyMedia -> {
-            onIncomingCall.invoke(call.name)
+        Call.State.PushIncomingReceived, Call.State.IncomingReceived, Call.State.IncomingEarlyMedia -> {
+            // Appel en réception - déléguer à un autre composant via callback
+           // onIncomingCall.invoke(call.name)
         }
 
+        Call.State.Connected, Call.State.StreamsRunning -> {
+            // Appel connecté - afficher les vues vidéo
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF121212))
+            ) {
+                // Vues vidéo (si la vidéo est activée)
+                TextureViewScreen(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray),
+                    onTextureAvailable = {
+                        isVideoEnabled = true
+                        onToggleVideo()
+                    },
+                    onInitVideo = onInitVideo
+                )
 
-        State.Connected -> {
-            TextureViewScreen(modifier = Modifier.background(Color.Gray),
-                onTextureAvailable = {
+                // Superposer les contrôles
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Boutons de contrôle pour l'appel en cours
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        // Bouton vidéo
+                        IconButton(
+                            onClick = {
+                                isVideoEnabled = !isVideoEnabled
+                                onToggleVideo()
+                            },
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Gray, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = if (isVideoEnabled) Icons.Default.Videocam else Icons.Default.VideocamOff,
+                                contentDescription = "Toggle Video",
+                                tint = Color.White
+                            )
+                        }
 
-                }) { textureView, captureTextureView ->
-                onInitVideo.invoke(textureView, captureTextureView)
+                        // Bouton fin d'appel
+                        IconButton(
+                            onClick = onEndCall,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Red, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CallEnd,
+                                contentDescription = "End Call",
+                                tint = Color.White
+                            )
+                        }
+
+                        // Bouton bascule caméra (avant/arrière)
+                        IconButton(
+                            onClick = onToggleCamera,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Gray, CircleShape),
+                            enabled = isVideoEnabled
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Videocam,
+                                contentDescription = "Switch Camera",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
 
-        State.Released -> onEndCall.invoke()
+        Call.State.Released -> {
+            // Appel terminé
+            onEndCall.invoke()
+        }
+
         else -> {
-            Text(text = call.name)
+            // États non gérés spécifiquement
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF121212)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Call state: ${call.name}",
+                        color = Color.White,
+                        fontSize = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    IconButton(
+                        onClick = onEndCall,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(Color.Red, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CallEnd,
+                            contentDescription = "End Call",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -143,12 +252,11 @@ fun CallScreen(
 fun CallScreenPreview() {
     CallScreen(
         phoneNumber = "123 456 789",
-        call = State.Idle,
-        onIncomingCall = {},
-        onEndCall = { /* Preview action */ },
-        onInitVideo = { _, _ ->
-        },
-        onToggleCamera = { /* Preview toggle */ }
+        call = Call.State.Idle,
+        //onIncomingCall = {},
+        onEndCall = {},
+        onInitVideo = { _, _ -> },
+        onToggleVideo = {},
+        onToggleCamera = {}
     )
 }
-

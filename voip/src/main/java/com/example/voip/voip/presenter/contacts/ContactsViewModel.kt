@@ -1,5 +1,6 @@
 package com.example.voip.voip.presenter.contacts
 
+
 import androidx.lifecycle.ViewModel
 import com.example.voip.voip.domain.ICondoVoip
 import org.linphone.core.TransportType

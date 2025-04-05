@@ -42,7 +42,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voip.voip.domain.ICondoVoip
+import com.example.voip.voip.presenter.call.CallScreen
 import com.example.voip.voip.presenter.call.CallStateDisplay
+import com.example.voip.voip.presenter.call.CallViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -81,7 +83,6 @@ class CallingActivity : ComponentActivity() {
                 val viewModel: VideoCallViewModel = koinViewModel()
                 viewModel.answerCall()
                 MainCallScreen(
-                    viewModel = viewModel,
                     onCallEnded = { finish() }
                 )
             }
@@ -173,12 +174,18 @@ data class CallState(
 // VideoCallScreen.kt
 @Composable
 fun MainCallScreen(
-    viewModel: VideoCallViewModel = koinViewModel(),
+    callViewModel: CallViewModel = koinViewModel(),
     onCallEnded: () -> Unit
 ) {
-    val callState by viewModel.callState.collectAsState()
+    val state by callViewModel.callState.collectAsState()
+    val isVideoEnabled by callViewModel.isVideoEnabled.collectAsState()
 
-    if (!callState.isCallActive) {
+    // Extraire le numéro de téléphone depuis les informations d'appel si disponible
+    val phoneNumber = state.call?.remoteAddress?.displayName
+        ?: state.call?.remoteAddress?.username
+        ?: ""
+
+    if (state.state == Call.State.Released) {
         LaunchedEffect(Unit) {
             onCallEnded()
         }
@@ -189,7 +196,25 @@ fun MainCallScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        CallStateDisplay(callState = callState.state)
+        CallStateDisplay(phoneNumber = phoneNumber,
+            call = state.state,
+            onEndCall = {
+                callViewModel.hangUp()
+                onCallEnded()
+            },
+            onInitVideo = { textureView, captureTextureView ->
+                callViewModel.initVideo(textureView, captureTextureView)
+            },
+            onToggleVideo = {
+                callViewModel.toggleVideo()
+            },
+            onToggleCamera = {
+                callViewModel.toggleCamera()
+            },
+            onIncomingCall = {
+                callViewModel.answerCall()
+            }
+        )
     }
 }
 
