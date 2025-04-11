@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.example.testkmpapp.feature.mainscreen.NavigationRoot
 import com.example.testkmpapp.theme.CondoTheme
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.linphone.core.tools.service.CoreService
 
@@ -35,10 +38,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CondoTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                val snackbarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
+                Scaffold(
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
                     NavigationRoot(
                         onIncomingCall = {
                             showNotification(it)
+                        },
+                        onErrorLogin = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(it)
+                            }
                         },
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -79,5 +92,5 @@ fun GreetingView(text: String) {
 @Preview
 @Composable
 fun DefaultPreview() {
-        GreetingView("Hello, Android!")
+    GreetingView("Hello, Android!")
 }

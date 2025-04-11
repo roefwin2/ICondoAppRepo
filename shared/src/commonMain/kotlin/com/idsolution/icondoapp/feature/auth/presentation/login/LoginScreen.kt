@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -42,8 +43,19 @@ import org.koin.core.annotation.KoinExperimentalAPI
 fun LoginScreenRoot(
     onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit,
+    onErrorLogin: (String) -> Unit,
     viewModel: LoginViewModel = koinViewModel(),
 ) {
+    LaunchedEffect(viewModel.events) {
+        viewModel.events.collect {
+            when (it) {
+                is LoginEvent.Error -> {
+                    onErrorLogin.invoke(it.error.toString())
+                }
+                else -> Unit
+            }
+        }
+    }
     val keyboardController = LocalSoftwareKeyboardController.current
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -69,7 +81,6 @@ fun LoginScreenRoot(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoginScreen(
     state: LoginState,

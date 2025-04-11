@@ -27,6 +27,7 @@ import org.koin.compose.koinInject
 @Composable
 fun NavigationRoot(
     onIncomingCall: ((String) -> Unit),
+    onErrorLogin: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -56,6 +57,10 @@ fun NavigationRoot(
                     startDestination = if (authState is AuthState.Authenticated) "mainscreen" else "intro",
                     navController = navController,
                     onIncomingCall = { onIncomingCall.invoke(it) },
+                    onErrorLogin = {
+                        // Gérer l'erreur de connexion
+                        onErrorLogin.invoke(it)
+                    },
                     onLogout = {
                         // Déconnexion
                         coroutineScope.launch {
@@ -75,6 +80,7 @@ private fun NavGraphBuilder.authGGraph(
     startDestination: String,
     navController: NavHostController,
     onIncomingCall: (String) -> Unit,
+    onErrorLogin: (String) -> Unit,
     onLogout: () -> Unit
 ) {
     navigation(
@@ -98,6 +104,9 @@ private fun NavGraphBuilder.authGGraph(
                 },
                 onLoginSuccess = {
                     navController.navigate("mainscreen")
+                },
+                onErrorLogin = {
+                    onErrorLogin.invoke(it)
                 }
             )
         }

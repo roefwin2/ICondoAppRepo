@@ -15,6 +15,7 @@ import com.idsolution.icondoapp.feature.auth.domain.models.ICondoUser
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -32,12 +33,13 @@ class AuthRepositoryImpl(
     private var _loggedUser: ICondoUser? = null
     override val loggedUser get() = _loggedUser
 
+
     override suspend fun login(
         email: String,
         password: String
     ): Result<Unit,DataError.Network> =
         withContext(Dispatchers.IO) {
-
+            println("AuthRepositoryImpl login: $email $password")
             val result = httpClient.post(
                 urlString = "https://api.i-dsolution.com/oauth/token?grant_type=password&scope=read_profile&username=$email&password=$password"
             )
@@ -56,6 +58,7 @@ class AuthRepositoryImpl(
                 )
                 Result.Success(Unit)
             } else {
+                println("AuthRepositoryImpl login: ${result.status}")
                 Result.Error(DataError.Network.SERVER_ERROR)
             }
         }

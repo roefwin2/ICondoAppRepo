@@ -9,6 +9,7 @@ data class StartTunnelRequest(
     @SerialName("hostname") val hostname: String,
     @SerialName("password") val password: String,
     @SerialName("port") val port: Int,
-    @SerialName("site_name") val siteName: String,
+    @SerialName("sshPort") val sshPort: Int,
+    @SerialName("siteName") val siteName: String,
     @SerialName("username") val username: String
 )

@@ -23,9 +23,11 @@ class VoipViewModel(
         )
     val state = _state.asStateFlow()
 
-    init {
+    fun getPhonebook() {
+        println("getPhonebook: function")
         viewModelScope.launch {
             val phoneBookResult = getPhonebookUseCase.invoke()
+            println("getPhonebook: functio 2")
             _state.update {
                 phoneBookResult
             }

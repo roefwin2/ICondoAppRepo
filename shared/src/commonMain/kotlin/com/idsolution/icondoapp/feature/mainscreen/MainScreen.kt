@@ -21,10 +21,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +44,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.testkmpapp.feature.ssh.presenter.places.PlacesScreen
 import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
 import com.idsolution.icondoapp.feature.voip.NativeVoipScreen
+import com.idsolution.icondoapp.feature.voip.VoipViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 
@@ -51,11 +56,14 @@ fun MainScreen(
     onLogout: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
 
     val mainState = mainViewModel.state.value
     val username = mainState.username
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = { CustomTopAppBar(title = getScreenTitle(selectedTab), username = username) },
         bottomBar = { BottomNavigationBar(selectedTab) { selectedTab = it } }
     ) { innerPadding ->
@@ -75,10 +83,23 @@ fun MainScreen(
                         val navController = rememberNavController()
                         NavHost(navController = navController, startDestination = "voip") {
                             composable("voip") {
-                                NativeVoipScreen()
-                            }
-                            composable("calling") {
-                                Text("Contact screen")
+                                val voipViewModel: VoipViewModel = koinViewModel()
+                                val state = voipViewModel.state.collectAsState().value
+                                LaunchedEffect(Unit){
+                                    voipViewModel.getPhonebook()
+                                }
+                                LaunchedEffect(state){
+                                    if(state is com.idsolution.icondoapp.core.data.networking.Result.Error){
+                                        snackbarHostState.showSnackbar(state.error.toString())
+                                    }
+                                }
+                                val listPhoneBook = if(state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
+                                    state.data
+                                } else {
+                                    emptyList()
+                                }
+                                println("listPhoneBook: $state")
+                                NativeVoipScreen(phoneBook = listPhoneBook)
                             }
                         }
                     }

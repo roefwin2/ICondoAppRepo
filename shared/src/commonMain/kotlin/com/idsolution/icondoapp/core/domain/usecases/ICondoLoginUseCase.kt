@@ -25,7 +25,7 @@ class ICondoLoginUseCase(
             emit(result)
         }
         if (result is Result.Success) {
-            println("ICondoLoginUseCase Success login")
+            println("ICondoLoginUseCase Success login : ${sessionStorage.get()}")
             val userInfos = authRepository.getUser(email)
             println("ICondoLoginUseCase Success login 2")
             if (userInfos is Result.Success) {

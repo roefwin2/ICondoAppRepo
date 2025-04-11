@@ -13,24 +13,6 @@ class OpenDoorUseCase(
         condoSite: CondoSite,
         door: Int
     ): Result<Unit, com.idsolution.icondoapp.core.data.networking.Error> {
-        val startTunnel = condoSSHRepository.startTunnel(
-            hostname = condoSite.host,
-            localPort = condoSite.port,
-            username = "root",
-            password = "icondo",
-            siteName = condoSite.siteName
-        )
-        if (startTunnel is Error) return Result.Error(
-            DataError.Network.SERVER_ERROR
-        )
-        val submitLogin = condoSSHRepository.submitLogin(
-            username = "admin",
-            password = "1234",
-            siteName = condoSite.siteName
-        )
-        if (submitLogin is Error) return Result.Error(
-            DataError.Network.SERVER_ERROR
-        )
         val result =
             condoSSHRepository.unlockDoor(doorId = door, siteName = condoSite.siteName)
         return if (result is Result.Success) {

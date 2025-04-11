@@ -11,10 +11,12 @@ import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.PhoneBookDtoItem
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.toDomain
+import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
 import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -22,8 +24,12 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.seconds
 
 class CondoSSHRepositoryImpl(
     private val httpClient: HttpClient
@@ -43,7 +49,8 @@ class CondoSSHRepositoryImpl(
                     json.decodeFromString<SitesDto>(response.body())
                 Result.Success(sitesDto.toDomain())
             } else {
-                Result.Error(DataError.Network.SERVER_ERROR)
+                println("domains: ${response.status}")
+                Result.Error(DataError.Network.SERVER_ERROR, "${response.call.request.url} : ${response.status.description}")
             }
         }
 
@@ -61,7 +68,8 @@ class CondoSSHRepositoryImpl(
                     json.decodeFromString<List<PhoneBookDtoItem>>(response.body())
                 Result.Success(phoneBook.map { it.toDomain() })
             } else {
-                Result.Error(DataError.Network.SERVER_ERROR)
+                println("phonebook + $siteName: ${response.status}")
+                Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
             }
         }
 
@@ -70,6 +78,7 @@ class CondoSSHRepositoryImpl(
         localPort: Int,
         username: String,
         password: String,
+        sshPort: Int,
         siteName: String
     ): EmptyDataResult<DataError.Network> = withContext(Dispatchers.IO) {
         val response = httpClient.post(
@@ -82,6 +91,7 @@ class CondoSSHRepositoryImpl(
                     port = localPort,
                     password = password,
                     username = username,
+                    sshPort = sshPort,
                     siteName = siteName
                 )
             )
@@ -89,7 +99,7 @@ class CondoSSHRepositoryImpl(
         if (response.status.isSuccess()) {
             Result.Success(Unit)
         } else {
-            Result.Error(DataError.Network.SERVER_ERROR)
+            Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
         }
     }
 
@@ -113,7 +123,7 @@ class CondoSSHRepositoryImpl(
         if (response.status.isSuccess()) {
             Result.Success(Unit)
         } else {
-            Result.Error(DataError.Network.SERVER_ERROR)
+            Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.value}")
         }
     }
 
@@ -128,9 +138,33 @@ class CondoSSHRepositoryImpl(
             if (response.status.isSuccess()) {
                 Result.Success("Success")
             } else {
-                Result.Error(DataError.Network.SERVER_ERROR)
+                Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
             }
         }
+
+    override fun getDoorStatus(siteName: String): Flow<Result<List<DoorStatus>, DataError.Network>> = flow {
+        while(true) {
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    val response = httpClient.get("https://api.i-dsolution.com/sites/getDoorStatus") {
+                        parameter("siteName", siteName)
+                    }
+
+                    if (response.status.isSuccess()) {
+                        val doorStatusList = response.body<List<DoorStatus>>()
+                        Result.Success(doorStatusList)
+                    } else {
+                        Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
+                    }
+                } catch (e: Exception) {
+                    Result.Error(DataError.Network.SERVER_ERROR)
+                }
+            }
+
+            emit(result)
+            delay(5.seconds)
+        }
+    }
 
     override suspend fun getCamera(siteId: String): Result<String, DataError.Network> =
         withContext(Dispatchers.IO) {
@@ -144,7 +178,7 @@ class CondoSSHRepositoryImpl(
                     response.body<String>().toString()
                 )
             } else {
-                Result.Error(DataError.Network.SERVER_ERROR)
+                Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
             }
         }
 }

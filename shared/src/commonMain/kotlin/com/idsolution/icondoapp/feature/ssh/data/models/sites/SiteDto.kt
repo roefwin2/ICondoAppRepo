@@ -19,5 +19,11 @@ data class SiteDto(
     @SerialName("site_publicIP")
     val sitePublicIP: String?,
     @SerialName("site_publicPort")
-    val sitePublicPort: Int?
+    val sitePublicPort: Int?,
+    @SerialName("site_user")
+    val siteUser: String,
+    @SerialName("site_pwd")
+    val sitePwd: String,
+    @SerialName("site_ssh_port")
+    val siteSshPort: Int
 )

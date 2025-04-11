@@ -11,9 +11,17 @@ class GetPhonebookUseCase(
     private val condoSSHRepository: CondoSSHRepository
 ) {
 
-   suspend fun invoke(): Result<List<PhoneBook>, DataError.Network> {
-        val siteName = authRepository.loggedUser?.siteName ?: return Result.Error(DataError.Network.UNAUTHORIZED)
-        val phoneBook = condoSSHRepository.phonebook(siteName)
-       return phoneBook
-    }
+    suspend fun invoke(): Result<List<PhoneBook>, DataError.Network> {
+        authRepository.loggedUser?.siteName ?: return Result.Error(DataError.Network.UNAUTHORIZED)
+        val result = condoSSHRepository.domains()
+        if (result is Result.Error) return Result.Error(DataError.Network.SERVER_ERROR)
+        if (result is Result.Success) {
+            val site = result.data.firstOrNull { it.siteName == authRepository.loggedUser?.siteName }
+                val res = site?.siteName?.let { condoSSHRepository.phonebook(siteName = it) } ?: Result.Error(DataError.Network.UNKNOWN)
+                return res
+            }else{
+                return Result.Error(DataError.Network.SERVER_ERROR)
+            }
+        }
+
 }

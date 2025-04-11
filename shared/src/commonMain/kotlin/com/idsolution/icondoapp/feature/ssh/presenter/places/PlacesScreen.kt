@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,31 +36,59 @@ import com.idsolution.icondoapp.core.presentation.helper.Success
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.example.testkmpapp.feature.ssh.domain.models.Door
 import com.example.testkmpapp.feature.ssh.presenter.sites.CondoSitesViewModel
+import com.idsolution.icondoapp.core.data.networking.Error
+import com.idsolution.icondoapp.core.presentation.helper.Idle
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 
+@OptIn(KoinExperimentalAPI::class)
 @Composable
 fun PlacesScreen(
     viewModel: CondoSitesViewModel = koinViewModel(),
 ) {
     val state = viewModel.state.collectAsState().value
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            items(state.sites) { site ->
-                PlaceCard(site) { open, doorNumber ->
-                    viewModel.onDoorChange(condoSite = site, doorNumber = doorNumber, open = open)
+
+    when (val res = state.sites) {
+        is Loading -> {
+            CircularProgressIndicator()
+        }
+
+        is Success -> {
+            // Afficher votre contenu principal
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalArrangement = SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    items(res.value) { site ->
+                        PlaceCard(site) { open, doorNumber ->
+                            viewModel.onDoorChange(
+                                condoSite = site,
+                                doorNumber = doorNumber,
+                                open = open
+                            )
+                        }
+                    }
                 }
             }
         }
+
+        is com.idsolution.icondoapp.core.presentation.helper.Error -> {
+            // Afficher votre message d'erreur
+            Text(
+                text = "Une erreur est survenue: ${res.errorCause}",
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        is Idle -> {}
     }
 }
 

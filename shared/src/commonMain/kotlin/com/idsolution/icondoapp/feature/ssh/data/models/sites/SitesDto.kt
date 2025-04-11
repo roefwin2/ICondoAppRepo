@@ -37,6 +37,7 @@ fun SitesDto.toDomain(): List<CondoSite> {
                         number = door3 ?: 0
                     )
                 )
-            } ?: setOf())
+            } ?: setOf(),
+            siteUser = it.siteUser, sitePwd = it.sitePwd, siteSshPort = it.siteSshPort)
     }
 }

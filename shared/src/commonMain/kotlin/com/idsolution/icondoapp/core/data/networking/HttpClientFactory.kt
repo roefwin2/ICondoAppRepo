@@ -55,8 +55,13 @@ class HttpClientFactory(
                 }
                 bearer {
                     loadTokens {
-                        val accessToken = sessionStorage.get()?.accessToken ?: ""
-                        BearerTokens(accessToken = accessToken, refreshToken = "")
+                        val authInfo = sessionStorage.get()
+                        if (authInfo != null && authInfo.accessToken.isNotEmpty()) {
+                            BearerTokens(accessToken = authInfo.accessToken, refreshToken = "")
+                        } else {
+                            // Si pas de token valide, forcer le rafraîchissement
+                            null
+                        }
                     }
                     refreshTokens {
                         val response = client.post(
@@ -85,9 +90,8 @@ class HttpClientFactory(
                                 refreshToken = ""
                             )
                         } else {
-                            BearerTokens(accessToken = "", refreshToken = "")
+                            null
                         }
-
                     }
                 }
             }
