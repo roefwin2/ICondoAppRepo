@@ -157,7 +157,7 @@ class CondoSSHRepositoryImpl(
                         Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
                     }
                 } catch (e: Exception) {
-                    Result.Error(DataError.Network.SERVER_ERROR)
+                    Result.Error(DataError.Network.SERVER_ERROR,"${e.message}")
                 }
             }
 

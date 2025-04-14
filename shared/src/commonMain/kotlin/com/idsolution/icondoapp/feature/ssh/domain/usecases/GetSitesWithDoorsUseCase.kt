@@ -6,7 +6,11 @@ import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.example.testkmpapp.feature.ssh.domain.usecases.StartTunnelUseCase
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.Result
+import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
 import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flow
 
 class GetSitesWithDoorsUseCase(
     private val authRepository: AuthRepository,
@@ -14,11 +18,11 @@ class GetSitesWithDoorsUseCase(
     private val startTunnelUseCase: StartTunnelUseCase
 ) {
 
-    suspend fun invoke(): Result<List<CondoSite>, DataError.Network> {
+    fun invoke(): Flow<Result<List<CondoSite>, DataError.Network>> = flow {
         val currentUser =
-            authRepository.loggedUser ?: return Result.Error(DataError.Network.UNAUTHORIZED)
+            authRepository.loggedUser ?: return@flow emit(Result.Error(DataError.Network.UNAUTHORIZED))
         val result = condoSSHRepository.domains()
-        if (result is Result.Error) return result
+        if (result is Result.Error) return@flow emit(result)
         if (result is Result.Success) {
             val sites = result.data
 
@@ -27,7 +31,7 @@ class GetSitesWithDoorsUseCase(
             if (userSite != null) {
                 // Si le site actuel existe, lancer le tunnel SSH
                 val startTunnelResult = startTunnelUseCase.invoke(userSite)
-                if (startTunnelResult is Result.Error) return startTunnelResult
+                if (startTunnelResult is Result.Error) return@flow emit(startTunnelResult)
             }
             // Mettre à jour les portes du site actuel de l'utilisateur
             val sitesWithDoors = sites.map { site ->
@@ -37,9 +41,8 @@ class GetSitesWithDoorsUseCase(
                     site
                 }
             }
-            return Result.Success(sitesWithDoors)
+            emit(Result.Success(sitesWithDoors))
         }
-        return Result.Error(DataError.Network.SERVER_ERROR)
     }
 
 }

@@ -1,5 +1,9 @@
 package com.example.testkmpapp.feature.ssh.presenter.places
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,20 +16,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,9 +49,12 @@ import com.example.testkmpapp.feature.ssh.domain.models.Door
 import com.example.testkmpapp.feature.ssh.presenter.sites.CondoSitesViewModel
 import com.idsolution.icondoapp.core.data.networking.Error
 import com.idsolution.icondoapp.core.presentation.helper.Idle
+import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
+import kotlin.math.absoluteValue
 
 @OptIn(KoinExperimentalAPI::class)
 @Composable
@@ -137,19 +151,64 @@ fun CustomSwitchWithLoading(
     isLoading: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    // État interne pour suivre la transition
+    var localIsChecked by remember { mutableStateOf(isChecked) }
+    var remainingTimeMs by remember { mutableStateOf(0L) }
+    val maxTimeMs = 5000L // 5 secondes
+
+    // Animation de la position du curseur
+    val position by animateFloatAsState(
+        targetValue = if (localIsChecked) 1f else 0f,
+        animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing),
+        label = "switchPosition"
+    )
+
+    // Animation de la couleur de fond
+    val backgroundColor by animateColorAsState(
+        targetValue = if (localIsChecked) Color.Green else Color.Gray,
+        animationSpec = tween(durationMillis = 300),
+        label = "backgroundColor"
+    )
+
+    // Effet pour synchroniser l'état local avec l'état externe
+    LaunchedEffect(isChecked) {
+        localIsChecked = isChecked
+        if (isChecked) {
+            remainingTimeMs = maxTimeMs
+            // Lancer le compte à rebours
+            while (remainingTimeMs > 0) {
+                delay(16) // Rafraîchissement environ 60 fois par seconde
+                remainingTimeMs -= 16
+            }
+            // Après 5 secondes, déclencher la désélection
+            localIsChecked = false
+            onCheckedChange(false)
+        }
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = if (isChecked) "OPEN" else "CLOSE")
+        Text(text = if (localIsChecked) "OPEN" else "CLOSE")
+
+        // Indicateur de progression (optionnel)
+        if (localIsChecked && !isLoading) {
+            LinearProgressIndicator(
+                progress = 1f - (remainingTimeMs.toFloat() / maxTimeMs),
+                modifier = Modifier.width(30.dp).height(2.dp),
+                color = Color.Red
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
 
         Box(
             modifier = Modifier
                 .size(50.dp, 30.dp)
                 .clip(RoundedCornerShape(15.dp))
-                .background(if (isChecked) Color.Green else Color.Gray)
+                .background(backgroundColor)
                 .clickable(enabled = !isLoading) {
-                    onCheckedChange(!isChecked)
+                    onCheckedChange(!localIsChecked)
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -165,10 +224,10 @@ fun CustomSwitchWithLoading(
                         .size(20.dp)
                         .clip(CircleShape)
                         .background(Color.White)
-                        .align(
-                            if (isChecked) Alignment.CenterEnd else Alignment.CenterStart
+                        .align(Alignment.Center)
+                        .offset(
+                            x = ((if (position > 0.5f) 15.dp else -15.dp) * (2 * position - 1).absoluteValue)
                         )
-                        .padding(horizontal = 5.dp)
                 )
             }
         }
@@ -188,6 +247,6 @@ fun PlaceCardPreview() {
 @Composable
 fun DoorItemPreview() {
     MaterialTheme {
-        DoorItem(Door("Porte Preview", Success(true), 5)) {}
+        //DoorItem(Door("Porte Preview", Success(true), 5)) {}
     }
 }

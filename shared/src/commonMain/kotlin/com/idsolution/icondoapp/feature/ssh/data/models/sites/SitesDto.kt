@@ -4,6 +4,7 @@ package com.idsolution.icondoapp.feature.ssh.data.models.sites
 import com.idsolution.icondoapp.core.presentation.helper.Success
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.example.testkmpapp.feature.ssh.domain.models.Door
+import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

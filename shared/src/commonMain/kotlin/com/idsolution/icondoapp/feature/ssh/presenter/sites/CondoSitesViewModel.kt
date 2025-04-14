@@ -13,6 +13,7 @@ import com.idsolution.icondoapp.feature.ssh.domain.usecases.GetSitesWithDoorsUse
 import com.idsolution.icondoapp.feature.ssh.presenter.sites.CondoSitesState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -26,17 +27,18 @@ class CondoSitesViewModel(
 
     init {
         viewModelScope.launch {
-            val sites = getSitesWithDoorsUseCase.invoke()
-            when (sites) {
-                is Result.Success -> {
-                    _state.update {
-                        it.copy(sites = Success(sites.data))
+            getSitesWithDoorsUseCase.invoke().collectLatest { sites ->
+                when (sites) {
+                    is Result.Success -> {
+                        _state.update {
+                            it.copy(sites = Success(sites.data))
+                        }
                     }
-                }
 
-                is Result.Error -> {
-                    _state.update {
-                        it.copy(sites = Error(errorCause = sites.message.toString()))
+                    is Result.Error -> {
+                        _state.update {
+                            it.copy(sites = Error(errorCause = sites.message.toString()))
+                        }
                     }
                 }
             }

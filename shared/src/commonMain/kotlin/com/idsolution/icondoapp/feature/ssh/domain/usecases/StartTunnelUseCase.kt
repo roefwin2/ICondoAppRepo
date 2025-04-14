@@ -4,6 +4,7 @@ import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
+import kotlinx.coroutines.delay
 
 class StartTunnelUseCase(
     private val condoSSHRepository: CondoSSHRepository
@@ -20,11 +21,15 @@ class StartTunnelUseCase(
             siteName = condoSite.siteName,
             )
         if (startTunnel is Error) return startTunnel
-        val submitLogin = condoSSHRepository.submitLogin(
-            username = condoSite.siteUser,
-            password = condoSite.sitePwd,
-            siteName = condoSite.siteName
-        )
-        return submitLogin
+        if (startTunnel is Result.Success) {
+            val submitLogin = condoSSHRepository.submitLogin(
+                username = condoSite.siteUser,
+                password = condoSite.sitePwd,
+                siteName = condoSite.siteName
+            )
+            return submitLogin
+        }
+        return Result.Error(DataError.Network.SERVER_ERROR, "Unknown error")
+
     }
 }
