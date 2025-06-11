@@ -3,6 +3,7 @@ package com.example.testkmpapp
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ComposeUIViewController
+import com.bouyahya.kmpcall.di.initKoin
 import com.example.testkmpapp.feature.mainscreen.NavigationRoot
 import com.idsolution.icondoapp.NativeVoipLogin
 import platform.UIKit.UIAlertAction
@@ -44,12 +45,15 @@ val LocalVoipLoginFactory = staticCompositionLocalOf<NativeVoipLogin> {
 fun MainViewController(
     viewController: UIViewController,
     nativeViewFactory: NativeViewFactory,
-) = ComposeUIViewController(configure = {
-    enforceStrictPlistSanityCheck = false
-}) {
-    CompositionLocalProvider(LocalNativeViewFactory provides nativeViewFactory) {
-        NavigationRoot(onIncomingCall = {}, onErrorLogin = { errormsg ->
-            iOSNativeViewFactory(viewController).showAlert("Erreur de connexion", errormsg)
-        })
+) : UIViewController {
+    return ComposeUIViewController(configure = {
+        enforceStrictPlistSanityCheck = false
+    }) {
+
+        CompositionLocalProvider(LocalNativeViewFactory provides nativeViewFactory) {
+            NavigationRoot(onIncomingCall = {}, onErrorLogin = { errormsg ->
+                iOSNativeViewFactory(viewController).showAlert("Erreur de connexion", errormsg)
+            })
+        }
     }
 }

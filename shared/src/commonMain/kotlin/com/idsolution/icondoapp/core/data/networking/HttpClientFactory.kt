@@ -52,15 +52,6 @@ class HttpClientFactory(
                 )
             }
 
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        println(message)
-                    }
-                }
-                level = LogLevel.ALL
-            }
-
             defaultRequest {
                 contentType(ContentType.Application.Json)
             }
@@ -135,14 +126,14 @@ class HttpClientFactory(
 }
 
 // Force the Auth plugin to invoke the `loadTokens` block again on the next client request.
-fun HttpClient.invalidateBearerTokens() {
+/*fun HttpClient.invalidateBearerTokens() {
     try {
-        plugin(Auth).providers
+        plugin(Auth)
             .filterIsInstance<BearerAuthProvider>()
             .first().clearToken()
     } catch (e: IllegalStateException) {
         // No-op; plugin not installed
     }
-}
+}*/
 
 val CONDO_URL = "https://api.i-dsolution.com"

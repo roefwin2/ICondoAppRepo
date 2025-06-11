@@ -1,14 +1,12 @@
 package com.example.testkmpapp.feature.auth.data
 
+import com.example.testkmpapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.core.data.networking.models.AccessTokenResponse
 import com.idsolution.icondoapp.core.domain.AuthInfo
 import com.idsolution.icondoapp.core.domain.SessionStorage
-import com.example.testkmpapp.feature.auth.domain.AuthRepository
-import com.example.testkmpapp.feature.ssh.data.models.SubmitLoginRequest
-import com.idsolution.icondoapp.core.data.networking.invalidateBearerTokens
 import com.idsolution.icondoapp.feature.auth.data.models.CreateUser
 import com.idsolution.icondoapp.feature.auth.data.models.UserDto
 import com.idsolution.icondoapp.feature.auth.data.models.toDomain
@@ -16,17 +14,13 @@ import com.idsolution.icondoapp.feature.auth.domain.models.ICondoUser
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
@@ -41,7 +35,7 @@ class AuthRepositoryImpl(
     override suspend fun login(
         email: String,
         password: String
-    ): Result<Unit,DataError.Network> =
+    ): Result<Unit, DataError.Network> =
         withContext(Dispatchers.IO) {
             println("AuthRepositoryImpl login: $email $password")
             val result = httpClient.post(
@@ -60,11 +54,14 @@ class AuthRepositoryImpl(
                         username = email
                     )
                 )
-                httpClient.invalidateBearerTokens()
+                //httpClient.invalidateBearerTokens()
                 Result.Success(Unit)
             } else {
                 println("AuthRepositoryImpl login: ${result.status}")
-                Result.Error(DataError.Network.SERVER_ERROR,"${result.call.request.url} : ${result.status.description}")
+                Result.Error(
+                    DataError.Network.SERVER_ERROR,
+                    "${result.call.request.url} : ${result.status.description}"
+                )
             }
         }
 
@@ -78,7 +75,7 @@ class AuthRepositoryImpl(
 
             val result = httpClient.post(
                 urlString = "https://api.i-dsolution.com/users/sign-up"
-            ){
+            ) {
                 contentType(ContentType.Application.Json)
                 setBody(
                     CreateUser(
@@ -93,11 +90,14 @@ class AuthRepositoryImpl(
             if (result.status.isSuccess()) {
                 Result.Success(Unit)
             } else {
-                Result.Error(DataError.Network.SERVER_ERROR,"${result.call.request.url} : ${result.status.description}")
+                Result.Error(
+                    DataError.Network.SERVER_ERROR,
+                    "${result.call.request.url} : ${result.status.description}"
+                )
             }
         }
 
-    override suspend fun getUser(userName: String): Result<Unit,DataError.Network> =
+    override suspend fun getUser(userName: String): Result<Unit, DataError.Network> =
         withContext(Dispatchers.IO) {
             try {
                 val result = httpClient.get(
@@ -116,11 +116,14 @@ class AuthRepositoryImpl(
                     Result.Success(Unit)
                 } else {
                     println("AuthRepositoryImpl getUser: ${result.status}")
-                    Result.Error(DataError.Network.SERVER_ERROR,"${result.call.request.url} : ${result.status.description}")
+                    Result.Error(
+                        DataError.Network.SERVER_ERROR,
+                        "${result.call.request.url} : ${result.status.description}"
+                    )
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 println("AuthRepositoryImpl getUser: $e")
-                Result.Error(DataError.Network.UNKNOWN,e.message)
+                Result.Error(DataError.Network.UNKNOWN, e.message)
             }
         }
 }

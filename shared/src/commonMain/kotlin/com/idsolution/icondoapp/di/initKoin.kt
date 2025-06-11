@@ -1,5 +1,6 @@
 package com.example.testkmpapp.di
 
+import com.bouyahya.kmpcall.di.appModule
 import com.idsolution.icondoapp.core.data.di.coreDataModule
 import com.idsolution.icondoapp.core.domain.di.coreDomainModule
 import com.example.testkmpapp.feature.auth.data.di.authDataModule
@@ -16,6 +17,7 @@ fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
         config?.invoke(this)
         modules(
+            appModule,
             shareModule,
             authDataModule,
             coreDataModule,
