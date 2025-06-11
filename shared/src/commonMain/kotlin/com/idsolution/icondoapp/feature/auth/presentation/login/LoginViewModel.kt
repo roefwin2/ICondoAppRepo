@@ -33,12 +33,22 @@ class LoginViewModel(
                     isPasswordVisible = !state.isPasswordVisible
                 )
             }
+
             is LoginAction.OnLoginChanged -> {
                 state = state.copy(
                     email = TextFieldState(action.email),
-                    password = TextFieldState(action.password)
+                    password = TextFieldState(action.password),
+                    voipUsername = TextFieldState(action.voipUsername),
+                    voipPassword = TextFieldState(action.voipPassword),
+                    voipDomain = TextFieldState(action.voipDomain)
                 )
             }
+            LoginAction.OnToggleVoipPasswordVisibility -> {
+                state = state.copy(
+                    isVoipPasswordVisible = !state.isVoipPasswordVisible
+                )
+            }
+
             else -> Unit
         }
     }
@@ -49,19 +59,18 @@ class LoginViewModel(
             iCondoLoginUseCase.invoke(
                 email = state.email.text.toString().trim(),
                 password = state.password.text.toString(),
+                voipUsername = state.voipUsername.text.toString(),
+                voipPassword = state.voipPassword.text.toString(),
+                voipDomain = state.voipDomain.text.toString()
             ).collect { result ->
                 state = state.copy(isLoggingIn = false)
                 when (result) {
                     is Result.Error -> {
-                        if (result.error == DataError.Network.UNAUTHORIZED) {
-                            eventChannel.send(
-                                LoginEvent.Error(
-                                    UiText.DynamicString("Incorrect")
-                                )
+                        eventChannel.send(
+                            LoginEvent.Error(
+                                UiText.DynamicString(result.message ?: result.error.toString())
                             )
-                        } else {
-                            eventChannel.send(LoginEvent.Error(UiText.DynamicString("Error")))
-                        }
+                        )
                     }
 
                     is Result.Success -> {

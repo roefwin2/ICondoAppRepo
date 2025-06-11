@@ -5,4 +5,5 @@ actual fun iCondoVoipLoginUseCase(
     password: String,
     domain: String
 ) {
+    VoipLogin.login(username, password, domain)
 }

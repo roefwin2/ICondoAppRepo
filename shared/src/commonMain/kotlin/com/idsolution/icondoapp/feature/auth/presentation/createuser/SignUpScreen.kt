@@ -13,7 +13,9 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -97,6 +99,7 @@ private fun SignupScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
+            // Champs standard d'inscription
             CondoTextField(
                 state = state.firstName,
                 startIcon = Icons.Default.Person,
@@ -139,6 +142,49 @@ private fun SignupScreen(
                 title = "Password",
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Section VoIP
+            Text(
+                text = "VoIP Settings",
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Champs VoIP
+            CondoTextField(
+                state = state.voipUsername,
+                startIcon = Icons.Default.Phone,
+                endIcon = null,
+                hint = "VoIP Username",
+                title = "VoIP Username",
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CondoPasswordTextField(
+                state = state.voipPassword,
+                isPasswordVisible = state.isVoipPasswordVisible,
+                onTogglePasswordVisibility = {
+                    onAction(SignupAction.OnToggleVoipPasswordVisibility)
+                },
+                hint = "VoIP Password",
+                title = "VoIP Password",
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CondoTextField(
+                state = state.voipDomain,
+                startIcon = Icons.Default.Info,
+                endIcon = null,
+                hint = "VoIP Domain",
+                title = "VoIP Domain",
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(modifier = Modifier.height(32.dp))
 
             CondoActionButton(

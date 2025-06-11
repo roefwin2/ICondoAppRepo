@@ -23,10 +23,10 @@ class EncryptedSessionsStorage(
             val username = dataStore.data.map {
                 it[stringPreferencesKey(USERNAME_AUTH_INFO)]
             }.first()
-            if (accessToken == null || username == null) {
+            if (accessToken == null) {
                 null
             } else {
-                AuthInfo(accessToken = accessToken, username = username)
+                AuthInfo(accessToken = accessToken, username = username ?: "")
             }
         }
     }
@@ -39,10 +39,12 @@ class EncryptedSessionsStorage(
                     dataStore.remove(stringPreferencesKey(USERNAME_AUTH_INFO))
                 }
                 return@withContext
-            }
-            dataStore.edit { dataStore ->
-                dataStore[stringPreferencesKey(KEY_AUTH_INFO)] = info.accessToken
-                dataStore[stringPreferencesKey(USERNAME_AUTH_INFO)] = info.username
+            } else {
+                println("EncryptedSessionsStorage set: $info")
+                dataStore.edit { dataStore ->
+                    dataStore[stringPreferencesKey(KEY_AUTH_INFO)] = info.accessToken
+                    dataStore[stringPreferencesKey(USERNAME_AUTH_INFO)] = info.username
+                }
             }
         }
     }

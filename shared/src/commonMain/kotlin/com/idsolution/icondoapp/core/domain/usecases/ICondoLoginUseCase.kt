@@ -18,6 +18,9 @@ class ICondoLoginUseCase(
     fun invoke(
         email: String,
         password: String,
+        voipUsername: String,
+        voipPassword: String,
+        voipDomain: String
     ): Flow<Result<Unit, DataError.Network>> = flow {
         val result = authRepository.login(email, password)
         if (result is Result.Error) {
@@ -38,9 +41,9 @@ class ICondoLoginUseCase(
                 println("ICondoLoginUseCase Success login")
                 authSessionManager.onLoginSuccess(authRepository.loggedUser)
                 iCondoVoipLoginUseCase(
-                    username = "regis_test",
-                    password = "e1d2o3U4",
-                    domain = "sip.linphone.org"
+                    username = voipUsername,
+                    password = voipPassword,
+                    domain = voipDomain
                 )
                 emit(Result.Success(Unit))
             } else {

@@ -49,6 +49,22 @@ class SignupViewModel(
             SignupAction.OnTogglePasswordVisibility -> {
                 state = state.copy(isPasswordVisible = !state.isPasswordVisible)
             }
+            is SignupAction.OnVoipUsernameChange -> {
+                state = state.copy(voipUsername = TextFieldState(action.value))
+                validateForm()
+            }
+            is SignupAction.OnVoipPasswordChange -> {
+                state = state.copy(voipPassword = TextFieldState(action.value))
+                validateForm()
+            }
+
+            is SignupAction.OnVoipDomainChange -> {
+                state = state.copy(voipDomain = TextFieldState(action.value))
+                validateForm()
+            }
+            SignupAction.OnToggleVoipPasswordVisibility -> {
+                state = state.copy(isVoipPasswordVisible = !state.isVoipPasswordVisible)
+            }
 
             SignupAction.OnSignupClick -> {
                 signup()
@@ -86,7 +102,10 @@ class SignupViewModel(
                     firstName = state.firstName.text.toString(),
                     lastName = state.lastName.text.toString(),
                     email = state.email.text.toString(),
-                    password = state.password.text.toString()
+                    password = state.password.text.toString(),
+                    voipUsername = state.voipUsername.text.toString(),
+                    voipPassword = state.voipPassword.text.toString(),
+                    voipDomain = state.voipDomain.text.toString()
                 ).collectLatest { result ->
                     if (result is Result.Success) {
                         _events.send(SignupEvent.SignupSuccess)

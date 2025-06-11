@@ -4,6 +4,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ComposeUIViewController
 import com.example.testkmpapp.feature.mainscreen.NavigationRoot
+import com.idsolution.icondoapp.NativeVoipLogin
 import platform.UIKit.UIAlertAction
 import platform.UIKit.UIAlertActionStyleDefault
 import platform.UIKit.UIAlertController
@@ -36,10 +37,13 @@ class iOSNativeViewFactory(private val viewController: UIViewController) {
 val LocalNativeViewFactory = staticCompositionLocalOf<NativeViewFactory> {
     error("LocalNativeViewFactory not initialized")
 }
+val LocalVoipLoginFactory = staticCompositionLocalOf<NativeVoipLogin> {
+    error("LocalVoipLoginFactory not initialized")
+}
 
 fun MainViewController(
     viewController: UIViewController,
-    nativeViewFactory: NativeViewFactory
+    nativeViewFactory: NativeViewFactory,
 ) = ComposeUIViewController(configure = {
     enforceStrictPlistSanityCheck = false
 }) {

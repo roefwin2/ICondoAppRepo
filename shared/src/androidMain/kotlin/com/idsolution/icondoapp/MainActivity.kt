@@ -1,6 +1,7 @@
 package com.idsolution.icondoapp
 
 import android.Manifest
+import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.example.testkmpapp.feature.mainscreen.NavigationRoot
 import com.example.testkmpapp.theme.CondoTheme
 import kotlinx.coroutines.launch
@@ -26,15 +28,7 @@ import org.linphone.core.tools.service.CoreService
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // We will need the RECORD_AUDIO permission for video call
-        if (packageManager.checkPermission(
-                Manifest.permission.RECORD_AUDIO,
-                packageName
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 0)
-        }
-        requestPermissions()
+        checkAndRequestPermissions(this, this)
         enableEdgeToEdge()
         setContent {
             CondoTheme {
@@ -60,19 +54,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Exemple de code pour demander les permissions à l'exécution
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.POST_NOTIFICATIONS
-            ),
-            0
-        )
-    }
-
     private fun showNotification(title: String) {
         val notification = NotificationCompat.Builder(applicationContext, "condo_channel_id")
             .setContentTitle(title)
@@ -82,15 +63,25 @@ class MainActivity : ComponentActivity() {
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(1, notification)
     }
+
+    private fun checkAndRequestPermissions(context: Context, activity: Activity) {
+        val permissionsToRequest = arrayOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA,
+            Manifest.permission.POST_NOTIFICATIONS
+        )
+
+        val permissionsNeeded = permissionsToRequest.filter { permission ->
+            ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsNeeded.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                activity,
+                permissionsToRequest,
+                0
+            )
+        }
+    }
 }
 
-@Composable
-fun GreetingView(text: String) {
-    Text(text = text)
-}
-
-@Preview
-@Composable
-fun DefaultPreview() {
-    GreetingView("Hello, Android!")
-}

@@ -48,7 +48,7 @@ fun CallScreen(
     onToggleCamera: () -> Unit
 ) {
     var isVideoEnabled by remember { mutableStateOf(false) }
-
+    println("call: $call")
     when (call) {
         Call.State.OutgoingRinging, Call.State.Idle, Call.State.OutgoingInit, Call.State.OutgoingProgress -> {
             // Écran d'appel sortant

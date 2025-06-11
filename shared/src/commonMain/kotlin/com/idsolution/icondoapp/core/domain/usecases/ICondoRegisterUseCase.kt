@@ -16,7 +16,10 @@ class ICondoRegisterUseCase(
         firstName: String,
         lastName: String,
         email: String,
-        password: String
+        password: String,
+        voipUsername: String,
+        voipPassword: String,
+        voipDomain: String
     ): Flow<Result<Unit, DataError.Network>> = flow {
         val result = authRepository.signup(firstName, lastName, email, password)
         if (result is Result.Error) {
@@ -24,10 +27,11 @@ class ICondoRegisterUseCase(
             emit(result)
         }
         if (result is Result.Success) {
-            iCondoLoginUseCase.invoke(email, password).collect {
-                println("ICondoRegisterUseCase invoke: $it")
-                emit(it)
-            }
+            iCondoLoginUseCase.invoke(email, password, voipUsername, voipPassword, voipDomain)
+                .collect {
+                    println("ICondoRegisterUseCase invoke: $it")
+                    emit(it)
+                }
         }
     }
 }
