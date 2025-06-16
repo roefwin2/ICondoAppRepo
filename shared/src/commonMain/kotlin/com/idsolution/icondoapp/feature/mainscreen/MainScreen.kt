@@ -46,8 +46,6 @@ import com.example.testkmpapp.feature.ssh.presenter.places.PlacesScreen
 import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
 import com.idsolution.icondoapp.feature.voip.NativeVoipScreen
 import com.idsolution.icondoapp.feature.voip.VoipViewModel
-import io.github.kotlin.fibonacci.firstElement
-import io.github.kotlin.fibonacci.secondElement
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 
@@ -88,19 +86,20 @@ fun MainScreen(
                             composable("voip") {
                                 val voipViewModel: VoipViewModel = koinViewModel()
                                 val state = voipViewModel.state.collectAsState().value
-                                LaunchedEffect(Unit){
+                                LaunchedEffect(Unit) {
                                     voipViewModel.getPhonebook()
                                 }
-                                LaunchedEffect(state){
-                                    if(state is com.idsolution.icondoapp.core.data.networking.Result.Error){
+                                LaunchedEffect(state) {
+                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Error) {
                                         snackbarHostState.showSnackbar(state.error.toString())
                                     }
                                 }
-                                val listPhoneBook = if(state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
-                                    state.data
-                                } else {
-                                    emptyList()
-                                }
+                                val listPhoneBook =
+                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
+                                        state.data
+                                    } else {
+                                        emptyList()
+                                    }
                                 println("listPhoneBook: $state")
                                 NativeVoipScreen(phoneBook = listPhoneBook)
                             }
@@ -176,7 +175,7 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         )
         NavigationBarItem(
             icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Partager") },
-            label = { Text("$firstElement + $secondElement") },
+            label = { Text("Vidéo") },
             selected = selectedTab == 2,
             onClick = { onTabSelected(2) }
         )

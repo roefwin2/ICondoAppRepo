@@ -1,5 +1,6 @@
 package com.example.testkmpapp.feature.auth.presentation.intro
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoAc
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoOutlinedActionButton
 import com.idsolution.icondoapp.core.presentation.designsystem.component.GradientBackground
 import com.example.testkmpapp.theme.CondoTheme
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
