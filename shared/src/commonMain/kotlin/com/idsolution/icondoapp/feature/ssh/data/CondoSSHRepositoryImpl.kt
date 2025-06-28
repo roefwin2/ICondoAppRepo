@@ -1,16 +1,18 @@
 package com.example.testkmpapp.feature.ssh.data
 
+import com.example.testkmpapp.feature.ssh.data.models.StartTunnelRequest
+import com.example.testkmpapp.feature.ssh.data.models.SubmitLoginRequest
+import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
+import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result
-import com.idsolution.icondoapp.feature.ssh.data.models.sites.SitesDto
-import com.example.testkmpapp.feature.ssh.data.models.StartTunnelRequest
-import com.example.testkmpapp.feature.ssh.data.models.SubmitLoginRequest
-import com.idsolution.icondoapp.feature.ssh.data.models.sites.toDomain
-import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.PhoneBookDtoItem
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.toDomain
+import com.idsolution.icondoapp.feature.ssh.data.models.sites.DoorNameDto
+import com.idsolution.icondoapp.feature.ssh.data.models.sites.SitesDto
+import com.idsolution.icondoapp.feature.ssh.data.models.sites.toDomain
+import com.idsolution.icondoapp.feature.ssh.domain.models.DoorName
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
 import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
 import io.ktor.client.HttpClient
@@ -50,14 +52,18 @@ class CondoSSHRepositoryImpl(
                 Result.Success(sitesDto.toDomain())
             } else {
                 println("domains: ${response.status}")
-                Result.Error(DataError.Network.SERVER_ERROR, "${response.call.request.url} : ${response.status.description}")
+                Result.Error(
+                    DataError.Network.SERVER_ERROR,
+                    "${response.call.request.url} : ${response.status.description}"
+                )
             }
         }
 
     override suspend fun phonebook(siteName: String): Result<List<PhoneBook>, DataError.Network> =
         withContext(Dispatchers.IO) {
 
-            val response = httpClient.get(urlString = "https://api.i-dsolution.com/sites/phonebook?siteName=$siteName")
+            val response =
+                httpClient.get(urlString = "https://api.i-dsolution.com/sites/phonebook?siteName=$siteName")
 
             if (response.status.isSuccess()) {
                 val json =
@@ -69,7 +75,10 @@ class CondoSSHRepositoryImpl(
                 Result.Success(phoneBook.map { it.toDomain() })
             } else {
                 println("phonebook + $siteName: ${response.status}")
-                Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
+                Result.Error(
+                    DataError.Network.SERVER_ERROR,
+                    "${response.call.request.url} : ${response.status.description}"
+                )
             }
         }
 
@@ -99,7 +108,10 @@ class CondoSSHRepositoryImpl(
         if (response.status.isSuccess()) {
             Result.Success(Unit)
         } else {
-            Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
+            Result.Error(
+                DataError.Network.SERVER_ERROR,
+                "${response.call.request.url} : ${response.status.description}"
+            )
         }
     }
 
@@ -123,7 +135,10 @@ class CondoSSHRepositoryImpl(
         if (response.status.isSuccess()) {
             Result.Success(Unit)
         } else {
-            Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.value}")
+            Result.Error(
+                DataError.Network.SERVER_ERROR,
+                "${response.call.request.url} : ${response.status.value}"
+            )
         }
     }
 
@@ -138,33 +153,62 @@ class CondoSSHRepositoryImpl(
             if (response.status.isSuccess()) {
                 Result.Success("Success")
             } else {
-                Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
+                Result.Error(
+                    DataError.Network.SERVER_ERROR,
+                    "${response.call.request.url} : ${response.status.description}"
+                )
             }
         }
 
-    override fun getDoorStatus(siteName: String): Flow<Result<List<DoorStatus>, DataError.Network>> = flow {
-        while(true) {
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    val response = httpClient.get("https://api.i-dsolution.com/sites/getDoorStatus") {
-                        parameter("siteName", siteName)
-                    }
+    override fun getDoorStatus(siteName: String): Flow<Result<List<DoorStatus>, DataError.Network>> =
+        flow {
+            while (true) {
+                val result = withContext(Dispatchers.IO) {
+                    try {
+                        val response =
+                            httpClient.get("https://api.i-dsolution.com/sites/getDoorStatus") {
+                                parameter("siteName", siteName)
+                            }
 
-                    if (response.status.isSuccess()) {
-                        val doorStatusList = response.body<List<DoorStatus>>()
-                        Result.Success(doorStatusList)
-                    } else {
-                        Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
+                        if (response.status.isSuccess()) {
+                            val doorStatusList = response.body<List<DoorStatus>>()
+                            Result.Success(doorStatusList)
+                        } else {
+                            Result.Error(
+                                DataError.Network.SERVER_ERROR,
+                                "${response.call.request.url} : ${response.status.description}"
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Result.Error(DataError.Network.SERVER_ERROR, "${e.message}")
                     }
-                } catch (e: Exception) {
-                    Result.Error(DataError.Network.SERVER_ERROR,"${e.message}")
                 }
-            }
 
-            emit(result)
-            delay(5.seconds)
+                emit(result)
+                delay(5.seconds)
+            }
         }
-    }
+
+    override suspend fun getDoorsName(siteName: String): Result<List<DoorName>, DataError.Network> =
+        withContext(Dispatchers.IO) {
+            val response =
+                httpClient.get(urlString = "https://api.i-dsolution.com/sites/getDoorNames?siteName=$siteName")
+
+            if (response.status.isSuccess()) {
+                val json =
+                    Json {
+                        ignoreUnknownKeys = true
+                    } // Pour ignorer les clés inconnues si nécessaire
+                val doorsNameDto =
+                    json.decodeFromString<List<DoorNameDto>>(response.body())
+                Result.Success(doorsNameDto.map { it.toDomain() })
+            } else {
+                Result.Error(
+                    DataError.Network.SERVER_ERROR,
+                    "${response.call.request.url} : ${response.status.description}"
+                )
+            }
+        }
 
     override suspend fun getCamera(siteId: String): Result<String, DataError.Network> =
         withContext(Dispatchers.IO) {
@@ -178,7 +222,10 @@ class CondoSSHRepositoryImpl(
                     response.body<String>().toString()
                 )
             } else {
-                Result.Error(DataError.Network.SERVER_ERROR,"${response.call.request.url} : ${response.status.description}")
+                Result.Error(
+                    DataError.Network.SERVER_ERROR,
+                    "${response.call.request.url} : ${response.status.description}"
+                )
             }
         }
 }
