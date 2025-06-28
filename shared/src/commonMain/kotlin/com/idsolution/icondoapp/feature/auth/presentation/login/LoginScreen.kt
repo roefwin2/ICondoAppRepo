@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -20,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -30,12 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.testkmpapp.theme.CondoTheme
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoActionButton
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoPasswordTextField
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoTextField
 import com.idsolution.icondoapp.core.presentation.designsystem.component.GradientBackground
-import com.idsolution.icondoapp.core.presentation.helper.ObserveAsEvents
-import com.example.testkmpapp.theme.CondoTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -48,20 +47,12 @@ fun LoginScreenRoot(
     onErrorLogin: (String) -> Unit,
     viewModel: LoginViewModel = koinViewModel(),
 ) {
-    LaunchedEffect(viewModel.events) {
-        viewModel.events.collect {
-            when (it) {
-                is LoginEvent.Error -> {
-                    onErrorLogin.invoke(it.error.toString())
-                }
-                else -> Unit
-            }
-        }
-    }
+    val events = viewModel.events.collectAsState(LoginEvent.Idle).value
     val keyboardController = LocalSoftwareKeyboardController.current
-    ObserveAsEvents(viewModel.events) { event ->
-        when (event) {
+    LaunchedEffect(events) {
+        when (events) {
             is LoginEvent.Error -> {
+                onErrorLogin.invoke(events.error.toString())
                 keyboardController?.hide()
             }
 
@@ -69,6 +60,8 @@ fun LoginScreenRoot(
                 keyboardController?.hide()
                 onLoginSuccess()
             }
+
+            else -> Unit
         }
     }
     LoginScreen(

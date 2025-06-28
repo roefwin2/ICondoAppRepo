@@ -6,8 +6,8 @@ import com.idsolution.icondoapp.core.domain.SessionStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.providers.BasicAuthCredentials
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -19,23 +19,12 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.plugin
-import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
-import io.ktor.client.request.invoke
 import io.ktor.client.request.post
-import io.ktor.client.request.request
-import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.headers
-import io.ktor.http.headersOf
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.reflect.instanceOf
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 class HttpClientFactory(
@@ -76,7 +65,7 @@ class HttpClientFactory(
                         val authInfo = sessionStorage.get()
                         println("loadTokens: $authInfo")
                         if (authInfo != null && authInfo.accessToken.isNotEmpty()) {
-                            BearerTokens(accessToken = authInfo.accessToken, refreshToken = "dfdfdfdf")
+                            BearerTokens(accessToken = authInfo.accessToken, refreshToken = "refresh")
                         } else {
                             // Si pas de token valide, forcer le rafraîchissement
                             null
@@ -116,7 +105,7 @@ class HttpClientFactory(
                                 sessionStorage.set(newAuthInfo)
                                 BearerTokens(
                                     accessToken = accessTokenResponse.accessToken,
-                                    refreshToken = "dfdfdfdf"
+                                    refreshToken = "refresh"
                                 )
                             } else {
                                 println("Failed to refresh token, status: ${response.status}")
@@ -137,9 +126,12 @@ class HttpClientFactory(
 // Force the Auth plugin to invoke the `loadTokens` block again on the next client request.
 fun HttpClient.invalidateBearerTokens() {
     try {
-        plugin(Auth).providers
+        val token = authProviders
             .filterIsInstance<BearerAuthProvider>()
-            .first().clearToken()
+            .first()
+        println("token: $token")
+        token.clearToken()
+        println("Bearer tokens cleared")
     } catch (e: IllegalStateException) {
         // No-op; plugin not installed
     }

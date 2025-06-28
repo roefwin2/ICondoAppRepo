@@ -11,6 +11,8 @@ import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.core.domain.usecases.ICondoLoginUseCase
 import com.idsolution.icondoapp.core.presentation.helper.UiText
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -22,8 +24,8 @@ class LoginViewModel(
     var state by mutableStateOf(LoginState())
         private set
 
-    private val eventChannel = Channel<LoginEvent>()
-    val events = eventChannel.receiveAsFlow()
+    private val eventSharedFlow = MutableSharedFlow<LoginEvent>()
+    val events = eventSharedFlow.asSharedFlow()
 
     fun onAction(action: LoginAction) {
         when (action) {
@@ -66,7 +68,7 @@ class LoginViewModel(
                 state = state.copy(isLoggingIn = false)
                 when (result) {
                     is Result.Error -> {
-                        eventChannel.send(
+                        eventSharedFlow.emit(
                             LoginEvent.Error(
                                 UiText.DynamicString(result.message ?: result.error.toString())
                             )
@@ -74,7 +76,7 @@ class LoginViewModel(
                     }
 
                     is Result.Success -> {
-                        eventChannel.send(LoginEvent.LoginSuccess)
+                        eventSharedFlow.emit(LoginEvent.LoginSuccess)
                     }
                 }
             }

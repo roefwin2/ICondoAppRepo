@@ -157,7 +157,7 @@ class CallService : CoreService() {
         }
     }
 
-    override fun showForegroundServiceNotification(isVideoCall: Boolean) {
+    override fun showForegroundServiceNotification() {
         val callNotificationIntent = Intent(this, CallingActivity::class.java)
         callNotificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         CoroutineScope(Dispatchers.IO).launch {

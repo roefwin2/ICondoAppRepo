@@ -61,6 +61,7 @@ class AuthRepositoryImpl(
                     )
                 )
                 httpClient.invalidateBearerTokens()
+                println("token cleared  and emit success")
                 Result.Success(Unit)
             } else {
                 println("AuthRepositoryImpl login: ${result.status}")
