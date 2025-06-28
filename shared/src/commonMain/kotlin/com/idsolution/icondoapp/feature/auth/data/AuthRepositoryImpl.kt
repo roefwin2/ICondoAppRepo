@@ -4,6 +4,7 @@ import com.example.testkmpapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result
+import com.idsolution.icondoapp.core.data.networking.invalidateBearerTokens
 import com.idsolution.icondoapp.core.data.networking.models.AccessTokenResponse
 import com.idsolution.icondoapp.core.domain.AuthInfo
 import com.idsolution.icondoapp.core.domain.SessionStorage
@@ -54,7 +55,7 @@ class AuthRepositoryImpl(
                         username = email
                     )
                 )
-                //httpClient.invalidateBearerTokens()
+                httpClient.invalidateBearerTokens()
                 Result.Success(Unit)
             } else {
                 println("AuthRepositoryImpl login: ${result.status}")

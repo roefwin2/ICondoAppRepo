@@ -9,6 +9,7 @@ import com.example.testkmpapp.di.initKoin
 import com.example.voip.voip.core.di.coreModule
 import com.example.voip.voip.data.di.voipDataModule
 import com.example.voip.voip.presenter.di.voipViewModelModule
+import com.google.firebase.FirebaseApp
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.dsl.module
@@ -17,6 +18,7 @@ import timber.log.Timber
 class CondoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        FirebaseApp.initializeApp(this)
         Timber.plant(Timber.DebugTree())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(

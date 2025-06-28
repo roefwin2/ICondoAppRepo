@@ -8,6 +8,8 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.providers.BasicAuthCredentials
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -126,14 +128,14 @@ class HttpClientFactory(
 }
 
 // Force the Auth plugin to invoke the `loadTokens` block again on the next client request.
-/*fun HttpClient.invalidateBearerTokens() {
+fun HttpClient.invalidateBearerTokens() {
     try {
-        plugin(Auth)
+        authProviders
             .filterIsInstance<BearerAuthProvider>()
             .first().clearToken()
     } catch (e: IllegalStateException) {
-        // No-op; plugin not installed
+        print("HttpClient - Failed to clear token : $e")
     }
-}*/
+}
 
 val CONDO_URL = "https://api.i-dsolution.com"

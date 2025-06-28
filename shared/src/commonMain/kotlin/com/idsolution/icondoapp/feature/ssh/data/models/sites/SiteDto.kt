@@ -11,7 +11,7 @@ data class SiteDto(
     @SerialName("site_id")
     val siteId: Int,
     @SerialName("site_img")
-    val siteImg: String,
+    val siteImg: String ? = null,
     @SerialName("site_lobbyDoors")
     val siteLobbyDoors: SiteLobbyDoors? = null,
     @SerialName("site_name")

@@ -40,11 +40,11 @@ class ICondoLoginUseCase(
                 sessionStorage.set(newAuthInfo)
                 println("ICondoLoginUseCase Success login")
                 authSessionManager.onLoginSuccess(authRepository.loggedUser)
-                iCondoVoipLoginUseCase(
+                /*iCondoVoipLoginUseCase(
                     username = voipUsername,
                     password = voipPassword,
                     domain = voipDomain
-                )
+                )*/
                 emit(Result.Success(Unit))
             } else {
                 println("ICondoLoginUseCase Error login")
