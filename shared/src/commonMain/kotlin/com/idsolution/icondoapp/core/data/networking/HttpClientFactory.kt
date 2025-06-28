@@ -9,7 +9,6 @@ import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.authProvider
-import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.providers.BasicAuthCredentials
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -130,9 +129,7 @@ class HttpClientFactory(
 // Force the Auth plugin to invoke the `loadTokens` block again on the next client request.
 fun HttpClient.invalidateBearerTokens() {
     try {
-        authProviders
-            .filterIsInstance<BearerAuthProvider>()
-            .first().clearToken()
+        authProvider<BearerAuthProvider>()?.clearToken()
     } catch (e: IllegalStateException) {
         print("HttpClient - Failed to clear token : $e")
     }

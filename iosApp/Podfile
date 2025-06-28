@@ -1,0 +1,11 @@
+source 'https://gitlab.linphone.org/BC/public/podspec.git'
+source 'https://github.com/CocoaPods/Specs.git'
+
+target 'iosApp' do
+  use_frameworks!
+  platform :ios, '16.0'
+  pod 'shared', :path => '../shared'
+  pod 'WebRTC-SDK', '125.6422.05'
+  
+  pod 'linphone-sdk'
+end
