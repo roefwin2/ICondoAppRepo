@@ -1,0 +1,84 @@
+##########################################
+# Global ignores pour Kotlin Multiplatform
+##########################################
+
+# Build directories
+/build/
+/**/build/
+
+# Gradle
+/.gradle/
+/gradle/
+/.gradle/
+/gradlew
+/gradlew.bat
+
+# Kotlin compiler caches
+/.kotlin/
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Local config
+local.properties
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# macOS .AppleDouble files
+.AppleDouble
+
+# Temporary files
+*.swp
+*.tmp
+*.temp
+
+# Capture output
+captures/
+
+# Android specific
+*.apk
+*.ap_
+*.dex
+*.class
+*.aab
+navigation.json
+.navigation/
+obj/
+
+# Google Services JSON
+**/google-services.json
+
+# Signing keys
+*.jks
+*.keystore
+*.pem
+*.p12
+*.key
+
+# Crashlytics
+crashlytics-build.properties
+
+# Xcode specific for KMP iOS
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj/project.xcworkspace/xcuserdata
+*.xcodeproj/xcuserdata
+*.xcodeproj/xcshareddata/xcschemes
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+DerivedData/
+Pods/
+Carthage/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+
+# Swi
+
