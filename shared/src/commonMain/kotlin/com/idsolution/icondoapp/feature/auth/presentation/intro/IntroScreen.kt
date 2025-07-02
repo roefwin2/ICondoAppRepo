@@ -1,5 +1,6 @@
 package com.example.testkmpapp.feature.auth.presentation.intro
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,21 +8,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Face
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.testkmpapp.theme.CondoTheme
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoActionButton
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoOutlinedActionButton
 import com.idsolution.icondoapp.core.presentation.designsystem.component.GradientBackground
-import com.example.testkmpapp.theme.CondoTheme
+import icondo.shared.generated.resources.Res
+import icondo.shared.generated.resources.icon_id_solution_transparent
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -91,10 +94,10 @@ fun IntroScreen(
 @Composable
 private fun CondoLogoVertical(modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            imageVector = Icons.Rounded.Face,
+        Image(
+            modifier = Modifier.clip(RoundedCornerShape(size = 8.dp)),
+            painter = painterResource(Res.drawable.icon_id_solution_transparent),
             contentDescription = "logo",
-            tint = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(

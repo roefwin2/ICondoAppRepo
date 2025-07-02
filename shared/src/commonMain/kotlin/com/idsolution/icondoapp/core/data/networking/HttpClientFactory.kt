@@ -6,6 +6,7 @@ import com.idsolution.icondoapp.core.domain.SessionStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.providers.BasicAuthCredentials
@@ -22,6 +23,7 @@ import io.ktor.client.plugins.plugin
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
@@ -48,6 +50,13 @@ class HttpClientFactory(
                     }
                 }
                 level = LogLevel.ALL
+            }
+            install(HttpRequestRetry) {
+                maxRetries = 1 // On réessaie une fois après le refresh
+                retryOnServerErrors(maxRetries)
+                retryIf { request, response ->
+                    response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden
+                }
             }
 
             defaultRequest {

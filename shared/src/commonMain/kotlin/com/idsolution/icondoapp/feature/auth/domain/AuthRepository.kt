@@ -10,4 +10,5 @@ interface AuthRepository {
     suspend fun login(email: String, password: String): Result<Unit,DataError.Network>
     suspend fun  signup(firstName: String, lastName: String,email: String, password: String): Result<Unit,DataError.Network>
     suspend fun getUser(userName : String): Result<Unit,DataError.Network>
+    fun invalidateToken()
 }

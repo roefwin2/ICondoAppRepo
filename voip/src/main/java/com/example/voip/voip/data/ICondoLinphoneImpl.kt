@@ -154,6 +154,9 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         val address = Factory.instance().createAddress("sip:$domain")
         address?.password = password
         address?.transport = transportType
+        address?.domain = domain
+        address?.port = 5060
+        address?.username = username
         params.serverAddress = address
         params.isRegisterEnabled = true
         val account = core.createAccount(params)
@@ -161,6 +164,12 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         core.addAuthInfo(authInfo)
         core.addAccount(account)
 
+        core.mediastreamerFactory.setDeviceInfo(
+            android.os.Build.MANUFACTURER,
+            android.os.Build.MODEL, android.os.Build.DEVICE,
+            1,
+            1,
+            0)
         // Asks the CaptureTextureView to resize to match the captured video's size ratio
         core.config.setBool("video", "auto_resize_preview_to_keep_ratio", true)
 
@@ -185,7 +194,7 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         //params.enableVideo(true)
 
         // Finally we start the call
-        core.inviteAddress(remoteAddress)
+        core.inviteAddressWithParams(remoteAddress,params)
         // Call process can be followed in onCallStateChanged callback from core listener
     }
 

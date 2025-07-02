@@ -66,7 +66,7 @@ fun NavigationRoot(
                         coroutineScope.launch {
                             authSessionManager.logout()
                             navController.navigate("auth") {
-                                popUpTo("mainscreen") { inclusive = true }
+                                popUpTo("intro") { inclusive = true }
                             }
                         }
                     }

@@ -124,4 +124,8 @@ class AuthRepositoryImpl(
                 Result.Error(DataError.Network.UNKNOWN,e.message)
             }
         }
+
+    override fun invalidateToken() {
+        httpClient.invalidateBearerTokens()
+    }
 }
