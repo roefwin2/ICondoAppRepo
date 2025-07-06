@@ -10,6 +10,8 @@
         android:protectionLevel="normal"
         tools:ignore="ProtectedPermissions" />
 
+    <uses-permission android:name="android.permission.USE_SIP" />
+
     <!-- Permissions pour le foregroundServiceType: location -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
         android:minSdkVersion="33"/>

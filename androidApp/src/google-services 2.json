@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040142958871",
+    "project_id": "icondo-f9c78",
+    "storage_bucket": "icondo-f9c78.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040142958871:android:24549cd1d39943051b7752",
+        "android_client_info": {
+          "package_name": "com.idsolution.icondoapp.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpoQzsHQZBG1WN3Al2_w5KfI7w2ublCLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

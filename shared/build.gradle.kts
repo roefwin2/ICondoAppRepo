@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.linphone.sdk.android)
         }
         commonMain.dependencies {
+            implementation(project.dependencies.platform(libs.androidx.compose.bom))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)

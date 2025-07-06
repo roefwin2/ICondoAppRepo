@@ -6,6 +6,6 @@ target 'iosApp' do
   platform :ios, '16.0'
   pod 'shared', :path => '../shared'
   pod 'WebRTC-SDK', '125.6422.05'
-  
+
   pod 'linphone-sdk'
 end
