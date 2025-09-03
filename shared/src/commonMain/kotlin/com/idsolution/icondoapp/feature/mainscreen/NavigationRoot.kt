@@ -121,10 +121,7 @@ private fun NavGraphBuilder.authGGraph(
             )
         }
         composable("mainscreen") {
-            MainScreen(
-                onIncomingCall = {
-                    onIncomingCall.invoke(it)
-                }, onLogout =
+            MainScreen( onLogout =
                 { onLogout.invoke() })
         }
     }

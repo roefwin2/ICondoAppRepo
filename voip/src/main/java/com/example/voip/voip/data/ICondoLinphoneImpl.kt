@@ -144,39 +144,72 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         domain: String,
         transportType: TransportType
     ) {
-        val authInfo =
-            Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
+        val factory = Factory.instance()
+        val identityUri = "sip:$username@$domain"
 
-        val params = core.createAccountParams()
-        val identity = Factory.instance().createAddress("sip:$username@$domain")
-        params.identityAddress = identity
+        // 0) Fully dedupe: remove any account with the same identity (default or not)
+        core.accountList
+            .filter { it.params.identityAddress?.asStringUriOnly() == identityUri }
+            .forEach { core.removeAccount(it) }
 
-        val address = Factory.instance().createAddress("sip:$domain")
-        address?.password = password
-        address?.transport = transportType
-        address?.domain = domain
-        address?.port = 5060
-        address?.username = username
-        params.serverAddress = address
-        params.isRegisterEnabled = true
-        val account = core.createAccount(params)
+        // 0b) Dedupe AuthInfo for same username/domain
+        core.authInfoList
+            .filter { it.username == username && (it.domain == domain || it.realm == domain) }
+            .forEach { core.removeAuthInfo(it) }
 
-        core.addAuthInfo(authInfo)
-        core.addAccount(account)
-
-        core.mediastreamerFactory.setDeviceInfo(
-            android.os.Build.MANUFACTURER,
-            android.os.Build.MODEL, android.os.Build.DEVICE,
-            1,
-            1,
-            0)
-        // Asks the CaptureTextureView to resize to match the captured video's size ratio
-        core.config.setBool("video", "auto_resize_preview_to_keep_ratio", true)
-
-        core.defaultAccount = account
+        // 1) Listener FIRST
+        core.removeListener(coreListener)
         core.addListener(coreListener)
-        core.start()
+
+        // 2) AuthInfo BEFORE account add
+        val auth = factory.createAuthInfo(
+            username, null, password, null, null, domain, null
+        )
+        core.addAuthInfo(auth)
+
+        // 3) Build params fully BEFORE add
+        val params = core.createAccountParams()
+
+        // Identity
+        params.identityAddress = factory.createAddress(identityUri)
+
+        // Server/proxy
+        val server = factory.createAddress("sip:$domain")!!.apply {
+            transport = transportType
+            port = when (transportType) {
+                TransportType.Tls -> 5061
+                TransportType.Tcp, TransportType.Udp -> 5060
+                else -> 5060
+            }
+        }
+        params.serverAddress = server
+        params.setRoutesAddresses(arrayOf(server))
+        params.expires = 300
+        params.isRegisterEnabled = true
+
+        // 4) PUSH STRATEGY: start WITHOUT push; enable later in a single update
+        params.pushNotificationAllowed = false
+        // If you already have the token here, set allowed=true and fill config BEFORE addAccount()
+
+        // 5) Create/add once, set default
+        core.clearAccounts()
+        val account = core.createAccount(params)
+        core.addAccount(account)
+        core.defaultAccount = account
+
+        // 6) Start core only if not already running
+        if (core.globalState == GlobalState.Ready || core.globalState == GlobalState.Off) {
+            try { core.start() } catch (_: Exception) { /* already started */ }
+        }
+
+        // 7) Optional tweaks
+        core.mediastreamerFactory.setDeviceInfo(
+            android.os.Build.MANUFACTURER, android.os.Build.MODEL, android.os.Build.DEVICE, 1, 1, 0
+        )
+        core.config.setBool("video", "auto_resize_preview_to_keep_ratio", true)
     }
+
+
 
     override fun outgoingCall(remoteSipUri: String) {
         val remoteAddress = Factory.instance().createAddress(remoteSipUri)
@@ -281,7 +314,7 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         }
     }
 
-    fun stopKeepAliveService() {
+   override fun logout() {
         val serviceIntent = Intent(Intent.ACTION_MAIN).setClass(
             context,
             CallService::class.java
@@ -290,6 +323,7 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
             "$TAG Stopping Keep alive for third party accounts Service"
         )
         context.stopService(serviceIntent)
+        core.stop()
     }
 }
 

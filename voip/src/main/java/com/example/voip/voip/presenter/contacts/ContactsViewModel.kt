@@ -3,7 +3,6 @@ package com.example.voip.voip.presenter.contacts
 
 import androidx.lifecycle.ViewModel
 import com.example.voip.voip.domain.ICondoVoip
-import org.linphone.core.TransportType
 
 data class Contact(
     val name: String,
@@ -16,5 +15,9 @@ class ContactsViewModel(
 
     fun callNumber(number: String) {
         voip.outgoingCall("sip:$number@sip.linphone.org")
+    }
+
+    fun logout() {
+        voip.logout()
     }
 }

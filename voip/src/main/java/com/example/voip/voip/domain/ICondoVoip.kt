@@ -20,6 +20,7 @@ interface ICondoVoip {
     fun answerCall()
     fun hangUp()
     fun startKeepAliveService()
+    fun logout()
 
     fun toggleVideo()
     fun toggleCamera()

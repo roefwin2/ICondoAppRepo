@@ -52,7 +52,6 @@ import org.koin.core.annotation.KoinExperimentalAPI
 @Composable
 fun MainScreen(
     mainViewModel: MainViewModel = koinViewModel(),
-    onIncomingCall: ((String) -> Unit),
     onLogout: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }

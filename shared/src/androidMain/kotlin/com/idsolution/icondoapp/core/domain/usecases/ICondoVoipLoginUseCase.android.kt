@@ -10,5 +10,5 @@ actual fun iCondoVoipLoginUseCase(
     domain: String
 ) {
     val iCondoVoip: ICondoVoip by inject(ICondoVoip::class.java)
-    iCondoVoip.login(username, password, domain, transportType = TransportType.Tcp)
+    iCondoVoip.login(username, password, domain, transportType = TransportType.Udp)
 }

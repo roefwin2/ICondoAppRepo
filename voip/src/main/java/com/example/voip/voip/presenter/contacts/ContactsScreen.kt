@@ -1,5 +1,6 @@
 package com.example.voip.voip.presenter.contacts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.SpaceBetween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +42,9 @@ fun ContactsScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .clickable{
+                viewModel.logout()
+            }
     ) {
         OutlinedTextField(
             value = phoneNumber,
