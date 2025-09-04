@@ -31,7 +31,11 @@ import org.linphone.core.tools.Log
 
 class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
     private val TAG = "ICondoLinphoneImpl"
-    private lateinit var core: Core
+    internal lateinit var core: Core
+
+    // Exposer le core pour le service
+    fun getCore(): Core = core
+
     private val _accountState: MutableStateFlow<AccountState?> = MutableStateFlow<AccountState?>(null)
     override val accountState = _accountState.asStateFlow()
 
@@ -45,21 +49,20 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
             state: RegistrationState?,
             message: String
         ) {
+            Log.i(TAG, "Account registration state: ${state?.name} - $message")
             _accountState.update {
                 AccountState(message = message, registrationState = state)
             }
-            // Prevent this trigger when core is stopped/start in remote prov
+
             if (core.globalState == GlobalState.Off) return
-            core.consolidatedPresence = ConsolidatedPresence.Online
-            Log.i(
-                "$TAG New account configured: [${account.params.identityAddress?.asStringUriOnly()}]"
-            )
-            if (!core.isPushNotificationAvailable || !account.params.isPushNotificationAvailable) {
+
+            if (state == RegistrationState.Ok) {
+                core.consolidatedPresence = ConsolidatedPresence.Online
+                Log.i(TAG, "Account successfully registered: [${account.params.identityAddress?.asStringUriOnly()}]")
                 startKeepAliveService()
-            } else {
-                Log.i(
-                    "$TAG Newly added account (or the whole Core) doesn't support push notifications but keep-alive foreground service is already enabled, nothing to do"
-                )
+                if (!core.isPushNotificationAvailable || !account.params.isPushNotificationAvailable) {
+
+                }
             }
         }
 
@@ -69,38 +72,9 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
             state: Call.State?,
             message: String
         ) {
-            // This function will be called each time a call state changes,
-            // which includes new incoming/outgoing calls
-            println("LOGIN TEST  call state ${state?.name}/${call.params}")
+            Log.i(TAG, "Call state changed: ${state?.name} - $message")
             _callState.update {
-                ICondoCall(
-                    call = call,
-                state = state ?: Call.State.Idle)
-            }
-        }
-
-        override fun onAudioDeviceChanged(core: Core, audioDevice: AudioDevice) {
-            // This callback will be triggered when a successful audio device has been changed
-        }
-
-        override fun onAudioDevicesListUpdated(core: Core) {
-            // This callback will be triggered when the available devices list has changed,
-            // for example after a bluetooth headset has been connected/disconnected.
-        }
-
-        override fun onAccountAdded(core: Core, account: Account) {
-            // Prevent this trigger when core is stopped/start in remote prov
-            if (core.globalState == GlobalState.Off) return
-
-            Log.i(
-                "$TAG New account configured: [${account.params.identityAddress?.asStringUriOnly()}]"
-            )
-            if (!core.isPushNotificationAvailable || !account.params.isPushNotificationAvailable) {
-                startKeepAliveService()
-            } else {
-                Log.i(
-                    "$TAG Newly added account (or the whole Core) doesn't support push notifications but keep-alive foreground service is already enabled, nothing to do"
-                )
+                ICondoCall(call = call, state = state ?: Call.State.Idle)
             }
         }
     }
@@ -110,32 +84,12 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         factory.setDebugMode(true, "Hello Linphone")
         core = factory.createCore(null, null, context)
 
-        // If the following property is enabled, it will automatically configure created call params with video enabled
-        //core.videoActivationPolicy.automaticallyInitiate = true
+        // Configuration essentielle
         core.isPushNotificationEnabled = true
         core.enableLogCollection(LogCollectionState.Enabled)
-    }
 
-    override fun initVideo(textureView: TextureView, captureTextureView: CaptureTextureView) {
-        // For video to work, we need two TextureViews:
-        // one for the remote video and one for the local preview
-        core.nativeVideoWindowId = textureView
-        // The local preview is a org.linphone.mediastream.video.capture.CaptureTextureView
-        // which inherits from TextureView and contains code to keep the ratio of the capture video
-        core.nativePreviewWindowId = captureTextureView
-
-        // Here we enable the video capture & display at Core level
-        // It doesn't mean calls will be made with video automatically,
-        // But it allows to use it later
-        core.isVideoCaptureEnabled = true
-        core.isVideoDisplayEnabled = true
-
-        // When enabling the video, the remote will either automatically answer the update request
-        // or it will ask it's user depending on it's policy.
-        // Here we have configured the policy to always automatically accept video requests
-        core.videoActivationPolicy.automaticallyAccept = true
-        // If you don't want to automatically accept,
-        // you'll have to use a code similar to the one in toggleVideo to answer a received request
+        // Ajouter le listener dès l'init
+        core.addListener(coreListener)
     }
 
     override fun login(
@@ -144,36 +98,28 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         domain: String,
         transportType: TransportType
     ) {
+        Log.i(TAG, "Connexion: $username@$domain")
+
         val factory = Factory.instance()
         val identityUri = "sip:$username@$domain"
 
-        // 0) Fully dedupe: remove any account with the same identity (default or not)
+        // Nettoyage comme dans votre code original
         core.accountList
             .filter { it.params.identityAddress?.asStringUriOnly() == identityUri }
             .forEach { core.removeAccount(it) }
 
-        // 0b) Dedupe AuthInfo for same username/domain
         core.authInfoList
             .filter { it.username == username && (it.domain == domain || it.realm == domain) }
             .forEach { core.removeAuthInfo(it) }
 
-        // 1) Listener FIRST
-        core.removeListener(coreListener)
-        core.addListener(coreListener)
-
-        // 2) AuthInfo BEFORE account add
-        val auth = factory.createAuthInfo(
-            username, null, password, null, null, domain, null
-        )
+        // AuthInfo
+        val auth = factory.createAuthInfo(username, null, password, null, null, domain, null)
         core.addAuthInfo(auth)
 
-        // 3) Build params fully BEFORE add
+        // Paramètres de compte
         val params = core.createAccountParams()
-
-        // Identity
         params.identityAddress = factory.createAddress(identityUri)
 
-        // Server/proxy
         val server = factory.createAddress("sip:$domain")!!.apply {
             transport = transportType
             port = when (transportType) {
@@ -187,97 +133,82 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         params.expires = 300
         params.isRegisterEnabled = true
 
-        // 4) PUSH STRATEGY: start WITHOUT push; enable later in a single update
-        params.pushNotificationAllowed = false
-        // If you already have the token here, set allowed=true and fill config BEFORE addAccount()
-
-        // 5) Create/add once, set default
+        // Créer et ajouter le compte
         core.clearAccounts()
         val account = core.createAccount(params)
         core.addAccount(account)
         core.defaultAccount = account
 
-        // 6) Start core only if not already running
+        // Démarrer le core
         if (core.globalState == GlobalState.Ready || core.globalState == GlobalState.Off) {
-            try { core.start() } catch (_: Exception) { /* already started */ }
+            try {
+                core.start()
+                Log.i(TAG, "Core démarré avec succès")
+            } catch (e: Exception) {
+                Log.e(TAG, "Erreur lors du démarrage du core: $e")
+            }
         }
-
-        // 7) Optional tweaks
-        core.mediastreamerFactory.setDeviceInfo(
-            android.os.Build.MANUFACTURER, android.os.Build.MODEL, android.os.Build.DEVICE, 1, 1, 0
-        )
-        core.config.setBool("video", "auto_resize_preview_to_keep_ratio", true)
-    }
-
-
-
-    override fun outgoingCall(remoteSipUri: String) {
-        val remoteAddress = Factory.instance().createAddress(remoteSipUri)
-        remoteAddress
-            ?: return // If address parsing fails, we can't continue with outgoing call process
-        // We also need a CallParams object
-        // Create call params expects a Call object for incoming calls, but for outgoing we must use null safely
-        val params = core.createCallParams(null)
-        params ?: return // Same for params
-
-        // We can now configure it
-        // Here we ask for no encryption but we could ask for ZRTP/SRTP/DTLS
-        params.mediaEncryption = MediaEncryption.None
-        // If we wanted to start the call with video directly
-        //params.enableVideo(true)
-
-        // Finally we start the call
-        core.inviteAddressWithParams(remoteAddress,params)
-        // Call process can be followed in onCallStateChanged callback from core listener
     }
 
     override fun answerCall() {
-        if (core.callsNb == 0) return
-
-        // If the call state isn't paused, we can get it using core.currentCall
-        val call = if (core.currentCall != null) core.currentCall else core.calls[0]
-        call ?: return
-
-        // Terminating a call is quite simple
-        call.accept()
+        Log.i(TAG, "Réponse à l'appel")
+        val call = core.currentCall ?: core.calls.firstOrNull()
+        call?.let {
+            try {
+                it.accept()
+                Log.i(TAG, "Appel accepté")
+            } catch (e: Exception) {
+                Log.e(TAG, "Erreur lors de l'acceptation: $e")
+            }
+        } ?: Log.w(TAG, "Aucun appel à accepter")
     }
 
     override fun hangUp() {
-        if (core.callsNb == 0) return
+        Log.i(TAG, "Raccrochage")
+        val call = core.currentCall ?: core.calls.firstOrNull()
+        call?.let {
+            try {
+                it.terminate()
+                Log.i(TAG, "Appel terminé")
+            } catch (e: Exception) {
+                Log.e(TAG, "Erreur lors du raccrochage: $e")
+            }
+        } ?: Log.w(TAG, "Aucun appel à terminer")
+    }
 
-        // If the call state isn't paused, we can get it using core.currentCall
-        val call = if (core.currentCall != null) core.currentCall else core.calls[0]
-        call ?: return
+    // Reste de votre implémentation...
+    override fun outgoingCall(remoteSipUri: String) {
+        val remoteAddress = Factory.instance().createAddress(remoteSipUri)
+        remoteAddress ?: return
 
-        // Terminating a call is quite simple
-        call.terminate()
+        val params = core.createCallParams(null)
+        params ?: return
+
+        params.mediaEncryption = MediaEncryption.None
+        core.inviteAddressWithParams(remoteAddress, params)
+    }
+
+    override fun initVideo(textureView: TextureView, captureTextureView: CaptureTextureView) {
+        core.nativeVideoWindowId = textureView
+        core.nativePreviewWindowId = captureTextureView
+        core.isVideoCaptureEnabled = true
+        core.isVideoDisplayEnabled = true
+        core.videoActivationPolicy.automaticallyAccept = true
     }
 
     override fun toggleVideo() {
         if (core.callsNb == 0) return
-        val call = if (core.currentCall != null) core.currentCall else core.calls[0]
+        val call = core.currentCall ?: core.calls[0]
         call ?: return
-        // To update the call, we need to create a new call params, from the call object this time
-        val params = core.createCallParams(call)
-        // Here we toggle the video state (disable it if enabled, enable it if disabled)
-        // Note that we are using currentParams and not params or remoteParams
-        // params is the object you configured when the call was started
-        // remote params is the same but for the remote
-        // current params is the real params of the call, resulting of the mix of local & remote params
-        params?.isVideoEnabled = !call.currentParams.isVideoEnabled
-        // Finally we request the call update
-        call.update(params)
 
-        // Note that when toggling off the video, TextureViews will keep showing the latest frame displayed
+        val params = core.createCallParams(call)
+        params?.isVideoEnabled = !call.currentParams.isVideoEnabled
+        call.update(params)
     }
 
     override fun toggleCamera() {
-        // Currently used camera
         val currentDevice = core.videoDevice
-
-        // Let's iterate over all camera available and choose another one
         for (camera in core.videoDevicesList) {
-            // All devices will have a "Static picture" fake camera, and we don't want to use it
             if (camera != currentDevice && camera != "StaticImage: Static picture") {
                 core.videoDevice = camera
                 break
@@ -287,42 +218,35 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
 
     override fun pauseOrResume() {
         if (core.callsNb == 0) return
-        val call = if (core.currentCall != null) core.currentCall else core.calls[0]
+        val call = core.currentCall ?: core.calls[0]
         call ?: return
 
         if (call.state != Call.State.Paused && call.state != Call.State.Pausing) {
-            // If our call isn't paused, let's pause it
             call.pause()
         } else if (call.state != Call.State.Resuming) {
-            // Otherwise let's resume it
             call.resume()
         }
     }
 
     override fun startKeepAliveService() {
-        val serviceIntent = Intent(Intent.ACTION_MAIN).setClass(
-            context,
-            CallService::class.java
-        ).apply {
+        val serviceIntent = Intent(context, CallService::class.java).apply {
             action = CallService.ACTION_START_CALL_SERVICE
         }
-        Log.i("$TAG Starting Keep alive for third party accounts Service")
+        Log.i(TAG, "Démarrage du service keep-alive")
         try {
             context.startService(serviceIntent)
         } catch (e: Exception) {
-            Log.e("$TAG Failed to start keep alive service: $e")
+            Log.e(TAG, "Erreur lors du démarrage du service: $e")
         }
     }
 
-   override fun logout() {
-        val serviceIntent = Intent(Intent.ACTION_MAIN).setClass(
-            context,
-            CallService::class.java
-        )
-        Log.i(
-            "$TAG Stopping Keep alive for third party accounts Service"
-        )
+    override fun logout() {
+        Log.i(TAG, "Déconnexion")
+        val serviceIntent = Intent(context, CallService::class.java)
         context.stopService(serviceIntent)
+
+        // Supprimer le listener avant d'arrêter le core
+        core.removeListener(coreListener)
         core.stop()
     }
 }

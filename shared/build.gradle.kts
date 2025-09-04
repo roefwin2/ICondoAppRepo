@@ -65,7 +65,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json.v160)
             //implementation(libs.webrtc)
             implementation(libs.calf.permissions)
-            implementation(libs.webrtc.kmp)
+            //implementation(libs.webrtc.kmp)
             implementation(libs.socket.io)
             implementation(libs.uuid)
 
