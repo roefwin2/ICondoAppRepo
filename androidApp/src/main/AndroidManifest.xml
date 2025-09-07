@@ -54,41 +54,6 @@
             android:foregroundServiceType="phoneCall|camera|microphone"
             android:stopWithTask="false"
             android:label="callservice" />
-        <!-- CallActivity pour les appels -->
-        <activity
-            android:name="com.idsolution.icondoapp.CallActivity"
-            android:exported="true"
-            android:label="CallActivity"
-            android:launchMode="singleTop"
-            android:showOnLockScreen="true"
-            android:turnScreenOn="true"
-            android:theme="@style/Theme.AppCompat">
-
-            <!-- Intent filter pour les appels depuis les notifications -->
-            <intent-filter>
-                <action android:name="ANSWER_CALL" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <!-- Service Firebase Messaging -->
-        <service
-            android:name="com.idsolution.icondoapp.core.FirebaseNotificationService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <!-- Receiver pour les actions de notification -->
-        <receiver
-            android:name="com.idsolution.icondoapp.core.CallActionReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="REJECT_CALL" />
-                <action android:name="ANSWER_CALL" />
-            </intent-filter>
-        </receiver>
 
         <!-- Métadonnées Firebase -->
         <meta-data

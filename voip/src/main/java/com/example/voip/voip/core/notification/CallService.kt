@@ -120,9 +120,11 @@ class CallService : CoreService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // ✅ ordre correct : context, channelId, callerName, phoneNumber, ...
         val notification = createIncomingCallNotification(
-            this, callerName, phoneNumber, "test", answerPendingIntent, declinePendingIntent
+            this, channelId, callerName, phoneNumber, answerPendingIntent, declinePendingIntent
         )
+
 
         startForeground(notificationId, notification)
 
