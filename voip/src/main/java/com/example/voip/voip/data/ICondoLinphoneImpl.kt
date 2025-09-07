@@ -128,14 +128,17 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
                 else -> 5060
             }
         }
+        params.isOutboundProxyEnabled = false
         params.serverAddress = server
-        params.setRoutesAddresses(arrayOf(server))
         params.expires = 300
         params.isRegisterEnabled = true
 
+        val p2 = params.clone()
+        p2.isRegisterEnabled = true
+        val account = core.createAccount(p2)
+
         // Créer et ajouter le compte
         core.clearAccounts()
-        val account = core.createAccount(params)
         core.addAccount(account)
         core.defaultAccount = account
 
@@ -185,7 +188,7 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         params ?: return
 
         params.mediaEncryption = MediaEncryption.None
-        core.inviteAddressWithParams(remoteAddress, params)
+        core.inviteAddress(remoteAddress)
     }
 
     override fun initVideo(textureView: TextureView, captureTextureView: CaptureTextureView) {
