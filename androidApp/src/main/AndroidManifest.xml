@@ -55,6 +55,13 @@
             android:stopWithTask="false"
             android:label="callservice" />
 
+        <activity
+            android:name="com.example.voip.voip.presenter.call.activities.CallingActivity"
+            android:exported="true"
+            android:label="Calling"
+            android:theme="@style/Theme.AppCompat">
+        </activity>
+
         <!-- Métadonnées Firebase -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

@@ -55,7 +55,7 @@ fun ContactsScreen(
 
         Button(
             onClick = {
-                onCallClick.invoke(phoneNumber)
+                //onCallClick.invoke(phoneNumber)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,7 +70,7 @@ fun ContactsScreen(
                 ContactItem(
                     contact = contact,
                     onCallClick = {
-                        onCallClick.invoke("")
+                        //onCallClick.invoke("")
                         viewModel.callNumber(contact.number)
                     }
                 )
