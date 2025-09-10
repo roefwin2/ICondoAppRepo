@@ -172,41 +172,82 @@ class CallService : CoreService() {
     private fun showIncomingCallNotification(call: Call) {
         Log.i(TAG, "Affichage notification appel entrant")
 
-        val callerName = call.remoteAddress?.displayName ?: "Appel entrant"
-        val phoneNumber = call.remoteAddress?.asStringUriOnly() ?: "Numéro inconnu"
+        val callerName = call.remoteAddress?.displayName
+            ?: call.remoteAddress?.username
+            ?: "Appel entrant"
+        val phoneNumber = call.remoteAddress?.username
+            ?: call.remoteAddress?.asStringUriOnly()
+            ?: "Numéro inconnu"
 
-        // Créer les intents pour répondre/refuser
-        val answerIntent = Intent(this, CallService::class.java).apply {
-            action = ACTION_ANSWER_CALL
-        }
-        val declineIntent = Intent(this, CallService::class.java).apply {
-            action = ACTION_DECLINE_CALL
-        }
-
-        val answerPendingIntent = PendingIntent.getService(
-            this, 0, answerIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val declinePendingIntent = PendingIntent.getService(
-            this, 1, declineIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = createIncomingCallNotification(
-            this, channelId, callerName, phoneNumber, answerPendingIntent, declinePendingIntent
-        )
-
-        // Remplacer la notification keep-alive par celle de l'appel entrant
-        startForeground(notificationId, notification)
-
-        // Lancer l'activité d'appel entrant
-        val callActivityIntent = Intent(this, CallingActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        // Intent pour répondre - Lance CallingActivity
+        val answerIntent = Intent(this, CallingActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra("incoming_call", true)
             putExtra("caller_name", callerName)
             putExtra("caller_number", phoneNumber)
+            putExtra("auto_answer", true) // Répondre automatiquement une fois l'activité ouverte
+            action = "ANSWER_CALL"
         }
-        startActivity(callActivityIntent)
+
+        val answerPendingIntent = PendingIntent.getActivity(
+            this, 101, answerIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Intent pour refuser - Reste un service
+        val declineIntent = Intent(this, CallService::class.java).apply {
+            action = ACTION_DECLINE_CALL
+        }
+        val declinePendingIntent = PendingIntent.getService(
+            this, 102, declineIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_call_notification)
+            .setContentTitle(callerName)
+            .setContentText("Appel entrant")
+            .setSubText(phoneNumber)
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setSound(null) // Géré ailleurs
+            .setVibrate(longArrayOf(0, 1000, 1000, 1000))
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_call_accept,
+                    "Répondre",
+                    answerPendingIntent // Lance CallingActivity
+                ).build()
+            )
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_call_reject,
+                    "Refuser",
+                    declinePendingIntent
+                ).build()
+            )
+            // PAS de fullScreenIntent pour éviter le lancement automatique
+            .setContentIntent(answerPendingIntent) // Clic sur la notification = répondre
+            .setTimeoutAfter(60000)
+            .build()
+
+        startForeground(2, notification)
+
+        // SUPPRIMER cette partie qui lance automatiquement l'activité :
+        /*
+        try {
+            startActivity(callingActivityIntent)
+            Log.i(TAG, "CallingActivity lancée directement")
+        } catch (e: Exception) {
+            Log.e(TAG, "Erreur lors du lancement de CallingActivity: $e")
+        }
+        */
+
+        Log.i(TAG, "Notification affichée, en attente de l'action utilisateur")
     }
 
     private fun showInCallNotification(call: Call) {
@@ -238,8 +279,24 @@ class CallService : CoreService() {
     }
 
     private fun handleAnswerCall() {
-        Log.i(TAG, "Réponse à l'appel")
-        iCondoVoip.answerCall()
+        Log.i(TAG, "Action 'Répondre' depuis la notification - Lancement de CallingActivity")
+
+        // Lancer CallingActivity avec réponse automatique
+        val callingActivityIntent = Intent(this, CallingActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra("incoming_call", true)
+            putExtra("auto_answer", true)
+            action = "ANSWER_CALL"
+        }
+
+        try {
+            startActivity(callingActivityIntent)
+            Log.i(TAG, "CallingActivity lancée depuis la notification")
+        } catch (e: Exception) {
+            Log.e(TAG, "Erreur lors du lancement de CallingActivity: $e")
+            // En cas d'erreur, répondre quand même depuis le service
+            iCondoVoip.answerCall()
+        }
     }
 
     private fun handleDeclineCall() {

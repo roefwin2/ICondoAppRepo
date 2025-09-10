@@ -4,34 +4,27 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.view.TextureView
-import androidx.annotation.WorkerThread
-import androidx.core.content.ContextCompat.startActivity
-import androidx.lifecycle.MutableLiveData
 import com.example.voip.voip.core.notification.CallService
-import org.linphone.core.Account
-import org.linphone.core.Call
-import org.linphone.core.Core
-import org.linphone.core.CoreListenerStub
-import org.linphone.core.Factory
-import org.linphone.core.LogCollectionState
-import org.linphone.core.MediaEncryption
-import org.linphone.core.RegistrationState
-import org.linphone.core.TransportType
-import org.linphone.mediastream.video.capture.CaptureTextureView
 import com.example.voip.voip.domain.ICondoVoip
 import com.example.voip.voip.domain.models.ICondoCall
 import com.example.voip.voip.presenter.call.activities.CallingActivity
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.linphone.core.AudioDevice
+import org.linphone.core.Account
+import org.linphone.core.Call
 import org.linphone.core.ConsolidatedPresence
+import org.linphone.core.Core
+import org.linphone.core.CoreListenerStub
+import org.linphone.core.Factory
 import org.linphone.core.GlobalState
+import org.linphone.core.LogCollectionState
+import org.linphone.core.MediaEncryption
 import org.linphone.core.Reason
+import org.linphone.core.RegistrationState
+import org.linphone.core.TransportType
 import org.linphone.core.tools.Log
+import org.linphone.mediastream.video.capture.CaptureTextureView
 
 class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
     private val TAG = "ICondoLinphoneImpl"
@@ -40,7 +33,8 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
     // Exposer le core pour le service
     fun getCore(): Core = core
 
-    private val _accountState: MutableStateFlow<AccountState?> = MutableStateFlow<AccountState?>(null)
+    private val _accountState: MutableStateFlow<AccountState?> =
+        MutableStateFlow<AccountState?>(null)
     override val accountState = _accountState.asStateFlow()
 
     private val _callState: MutableStateFlow<ICondoCall> = MutableStateFlow(ICondoCall())
@@ -62,7 +56,10 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
 
             if (state == RegistrationState.Ok) {
                 core.consolidatedPresence = ConsolidatedPresence.Online
-                Log.i(TAG, "Account successfully registered: [${account.params.identityAddress?.asStringUriOnly()}]")
+                Log.i(
+                    TAG,
+                    "Account successfully registered: [${account.params.identityAddress?.asStringUriOnly()}]"
+                )
                 startKeepAliveService()
             } else if (state == RegistrationState.Failed) {
                 Log.e(TAG, "Registration failed: $message")
@@ -78,15 +75,20 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
             Log.i(TAG, "Call state changed: ${state?.name} - $message")
 
             // Log détaillé pour le debugging
-            when(state) {
+            when (state) {
                 Call.State.Error -> {
                     Log.e(TAG, "Call error details: $message")
                     val errorInfo = call.errorInfo
-                    Log.e(TAG, "Error info - Reason: ${errorInfo.reason}, Protocol code: ${errorInfo.protocolCode}")
+                    Log.e(
+                        TAG,
+                        "Error info - Reason: ${errorInfo.reason}, Protocol code: ${errorInfo.protocolCode}"
+                    )
                 }
+
                 Call.State.Released -> {
                     Log.i(TAG, "Call released")
                 }
+
                 else -> {
                     Log.i(TAG, "Call state: ${state?.name}")
                 }
@@ -174,6 +176,7 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         // Créer et ajouter le compte
         core.clearAccounts()
         core.addAccount(account)
+        core.ringDuringIncomingEarlyMedia = true
         core.defaultAccount = account
 
         // Démarrer le core si nécessaire
@@ -235,11 +238,11 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
             if (call != null) {
                 val callActivityIntent = Intent(context, CallingActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    putExtra("incoming_call", true)
+                    putExtra("incoming_call", false)
                     putExtra("caller_name", "callerName")
                     putExtra("caller_number", "phoneNumber")
                 }
-                startActivity(context,callActivityIntent,null)
+                context.startActivity(callActivityIntent)
                 Log.i(TAG, "Appel initié avec succès")
             } else {
                 Log.e(TAG, "Échec de l'initiation de l'appel")
@@ -277,12 +280,13 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         val call = core.currentCall ?: core.calls.firstOrNull()
         call?.let {
             try {
-                when(it.state) {
+                when (it.state) {
                     Call.State.IncomingReceived,
                     Call.State.IncomingEarlyMedia -> {
                         it.decline(Reason.Declined)
                         Log.i(TAG, "Appel entrant refusé")
                     }
+
                     else -> {
                         it.terminate()
                         Log.i(TAG, "Appel terminé")

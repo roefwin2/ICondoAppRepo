@@ -4,8 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,6 +34,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         checkAndRequestPermissions(this, this)
         enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName"))
+                startActivityForResult(intent, 1234)
+            }
+        }
         setContent {
             CondoTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
