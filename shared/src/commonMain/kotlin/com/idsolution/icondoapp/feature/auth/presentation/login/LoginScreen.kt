@@ -153,6 +153,7 @@ private fun LoginScreen(
                 },
                 hint = "VoIP Password",
                 title = "VoIP Password",
+                enabled = false,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
