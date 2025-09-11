@@ -182,6 +182,7 @@ private fun SignupScreen(
                 endIcon = null,
                 hint = "VoIP Domain",
                 title = "VoIP Domain",
+                readOnly = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

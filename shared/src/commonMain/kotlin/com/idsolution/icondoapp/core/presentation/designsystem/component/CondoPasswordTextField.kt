@@ -52,7 +52,6 @@ fun CondoPasswordTextField(
     onTogglePasswordVisibility: () -> Unit,
     hint: String,
     title: String?,
-    enabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     var isFocused by remember {
@@ -84,7 +83,6 @@ fun CondoPasswordTextField(
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-            enabled = enabled,
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(
