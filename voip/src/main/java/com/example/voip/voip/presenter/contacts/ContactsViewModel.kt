@@ -14,7 +14,7 @@ class ContactsViewModel(
 ) : ViewModel() {
 
     fun callNumber(number: String) {
-        voip.outgoingCall("sip:$number@31.97.155.55")
+        voip.outgoingCall("sip:$number@sip.linphone.org")
     }
 
     fun logout() {
