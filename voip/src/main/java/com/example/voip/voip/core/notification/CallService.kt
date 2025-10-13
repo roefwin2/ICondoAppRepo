@@ -295,7 +295,7 @@ class CallService : CoreService() {
         } catch (e: Exception) {
             Log.e(TAG, "Erreur lors du lancement de CallingActivity: $e")
             // En cas d'erreur, répondre quand même depuis le service
-            iCondoVoip.answerCall()
+           iCondoVoip.answerCall()
         }
     }
 

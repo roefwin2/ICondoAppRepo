@@ -81,7 +81,9 @@ class CallingActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val viewModel: VideoCallViewModel = koinViewModel()
-                viewModel.answerCall()
+                if (answer) {
+                    viewModel.answerCall()
+                }
                 MainCallScreen(
                     onCallEnded = { finish() }
                 )
@@ -212,7 +214,7 @@ fun MainCallScreen(
                 callViewModel.toggleCamera()
             },
             onIncomingCall = {
-                callViewModel.answerCall()
+                //callViewModel.answerCall()
             }
         )
     }
