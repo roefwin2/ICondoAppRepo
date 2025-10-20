@@ -14,6 +14,7 @@ object VoipLogin {
     }
 
     fun login(username: String, password: String, domain: String) {
+        print("iCondoVoipLoginUseCase from use case: $username $password $domain")
         voipLoginListener?.onEvent(username, password, domain)
     }
 }
