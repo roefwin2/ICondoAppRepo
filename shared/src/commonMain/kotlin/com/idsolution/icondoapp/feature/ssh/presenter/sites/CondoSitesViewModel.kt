@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.example.testkmpapp.feature.ssh.domain.usecases.OpenDoorUseCase
 import com.idsolution.icondoapp.core.data.networking.Result
+import com.idsolution.icondoapp.core.domain.briges.VoipDoorBridge
 import com.idsolution.icondoapp.core.presentation.helper.Error
 import com.idsolution.icondoapp.core.presentation.helper.Loading
 import com.idsolution.icondoapp.core.presentation.helper.Resource
@@ -41,6 +42,15 @@ class CondoSitesViewModel(
                         }
                     }
                 }
+            }
+        }
+        // ✅ NOUVEAU : Écouter les événements VoIP
+        viewModelScope.launch {
+            VoipDoorBridge.doorOpenEvents.collect { request ->
+                print("[CondoSitesViewModel] Received door open request from VoIP")
+                val currentState = state.value.sites.value?.get(0) ?: return@collect
+                print("[CondoSitesViewModel] Current state: $currentState")
+                onDoorChange(currentState, currentState.doors.first().number, open = true)
             }
         }
     }
