@@ -163,6 +163,7 @@ private fun LoginScreen(
                 endIcon = null,
                 hint = "VoIP Domain",
                 title = "VoIP Domain",
+                readOnly = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

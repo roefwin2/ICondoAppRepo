@@ -55,7 +55,8 @@ fun CondoTextField(
     modifier: Modifier = Modifier,
     error: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
-    additionalInfo: String? = null
+    additionalInfo: String? = null,
+    readOnly: Boolean = false
 ) {
     var isFocused by remember {
         mutableStateOf(false)
@@ -100,6 +101,7 @@ fun CondoTextField(
             ),
             lineLimits = TextFieldLineLimits.SingleLine,
             cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+            readOnly = readOnly,
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(

@@ -5,5 +5,6 @@ actual fun iCondoVoipLoginUseCase(
     password: String,
     domain: String
 ) {
+    print("iCondoVoipLoginUseCase fro use case: $username $password $domain")
     VoipLogin.login(username, password, domain)
 }
