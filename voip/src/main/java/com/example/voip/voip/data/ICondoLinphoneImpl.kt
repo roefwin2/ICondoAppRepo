@@ -6,6 +6,7 @@ import android.os.Build
 import android.view.TextureView
 import com.example.voip.voip.core.notification.CallService
 import com.example.voip.voip.domain.ICondoVoip
+import com.example.voip.voip.domain.VoipEventHandler
 import com.example.voip.voip.domain.models.ICondoCall
 import com.example.voip.voip.presenter.call.activities.CallingActivity
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,7 @@ import org.linphone.core.TransportType
 import org.linphone.core.tools.Log
 import org.linphone.mediastream.video.capture.CaptureTextureView
 
-class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
+class ICondoLinphoneImpl(private val context: Context,private val voipEventHandler: VoipEventHandler? = null) : ICondoVoip {
     private val TAG = "[ICONDO_VIDEO]"
     internal lateinit var core: Core
 
@@ -515,6 +516,11 @@ class ICondoLinphoneImpl(private val context: Context) : ICondoVoip {
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error starting service: $e")
         }
+    }
+
+    fun requestDoorOpen() {
+        Log.i(TAG, "🚪 Door open requested from call")
+        voipEventHandler?.onDoorOpenRequested()
     }
 
     override fun logout() {
