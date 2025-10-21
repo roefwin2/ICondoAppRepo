@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.DoorFront
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material.icons.rounded.Videocam
@@ -41,6 +42,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voip.voip.data.ICondoLinphoneImpl
 import com.example.voip.voip.domain.ICondoVoip
 import com.example.voip.voip.presenter.call.CallScreen
 import com.example.voip.voip.presenter.call.CallStateDisplay
@@ -50,6 +52,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.linphone.core.Call
 
@@ -70,13 +73,17 @@ class CallingActivity : ComponentActivity() {
     private val notificationManagerCompat by lazy {
         NotificationManagerCompat.from(this)
     }
+
+    private val iCondoVoip: ICondoVoip by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Vérifier les permissions au démarrage
         checkPermissions()
         // Récupérer les extras
-        val answer = intent.getBooleanExtra("answer",true)
+        val answer = intent.getBooleanExtra("answer", true)
+
         notificationManagerCompat.cancel(2)
         setContent {
             MaterialTheme {
@@ -85,7 +92,10 @@ class CallingActivity : ComponentActivity() {
                     viewModel.answerCall()
                 }
                 MainCallScreen(
-                    onCallEnded = { finish() }
+                    onCallEnded = { finish() },
+                    onOpenDoor = {
+                        (iCondoVoip as? ICondoLinphoneImpl)?.requestDoorOpen()
+                    }
                 )
             }
         }
@@ -113,6 +123,7 @@ class CallingActivity : ComponentActivity() {
     }
 
     companion object {
+
         fun start(context: Context, callerId: String? = null) {
             val intent = Intent(context, CallingActivity::class.java).apply {
                 callerId?.let { putExtra(EXTRA_CALLER_ID, it) }
@@ -141,9 +152,10 @@ class VideoCallViewModel(
         }
     }
 
-    fun answerCall(){
+    fun answerCall() {
         iCondoVoip.answerCall()
     }
+
     fun toggleMicrophone() {
         _callState.update { currentState ->
             currentState.copy(isMicEnabled = !currentState.isMicEnabled)
@@ -167,7 +179,7 @@ class VideoCallViewModel(
 
 // CallState.kt
 data class CallState(
-    val state : Call.State = Call.State.Idle,
+    val state: Call.State = Call.State.Idle,
     val isCallActive: Boolean = true,
     val isMicEnabled: Boolean = true,
     val isCameraEnabled: Boolean = true
@@ -177,7 +189,8 @@ data class CallState(
 @Composable
 fun MainCallScreen(
     callViewModel: CallViewModel = koinViewModel(),
-    onCallEnded: () -> Unit
+    onCallEnded: () -> Unit,
+    onOpenDoor: (() -> Unit)? = null
 ) {
     val state by callViewModel.callState.collectAsState()
     val isVideoEnabled by callViewModel.isVideoEnabled.collectAsState()
@@ -198,7 +211,8 @@ fun MainCallScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        CallStateDisplay(phoneNumber = phoneNumber,
+        CallStateDisplay(
+            phoneNumber = phoneNumber,
             call = state.state,
             onEndCall = {
                 callViewModel.hangUp()
@@ -215,6 +229,9 @@ fun MainCallScreen(
             },
             onIncomingCall = {
                 //callViewModel.answerCall()
+            },
+            onOpenDoor = {
+                onOpenDoor?.invoke()
             }
         )
     }
@@ -227,6 +244,7 @@ fun ControlBar(
     onToggleMic: () -> Unit,
     onToggleCamera: () -> Unit,
     onEndCall: () -> Unit,
+    onOpenDoor: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(

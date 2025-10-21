@@ -1,6 +1,5 @@
 package com.idsolution.icondoapp.core.domain.briges
 
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
