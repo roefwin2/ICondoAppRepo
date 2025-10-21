@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.annotation.MainThread
 import androidx.core.app.NotificationCompat
 import com.example.voip.R
 import com.example.voip.voip.data.ICondoLinphoneImpl
@@ -28,12 +27,11 @@ class CallService : CoreService() {
 
     private val channelId = "incoming_call_channel"
     private val keepAliveChannelId = "voip_service_channel"
+    private val inCallChannelId = "in_call_channel"
     private val notificationId = 1000
 
-    // Variable pour tracker si on est déjà en foreground
     private var isInForeground = false
 
-    // Listener direct comme dans la démo
     private val coreListener = object : CoreListenerStub() {
         override fun onCallStateChanged(
             core: Core,
@@ -41,24 +39,23 @@ class CallService : CoreService() {
             state: Call.State?,
             message: String
         ) {
-            Log.i(TAG, "Call state changed: ${state?.name} - $message")
+            Log.i(TAG, "📞 Call state: ${state?.name}")
 
             when (state) {
                 Call.State.IncomingReceived -> {
                     showIncomingCallNotification(call)
                 }
 
-                Call.State.Connected -> {
+                Call.State.Connected, Call.State.StreamsRunning -> {
                     showInCallNotification(call)
                 }
 
                 Call.State.Released, Call.State.End, Call.State.Error -> {
-                    // Retourner au mode keep-alive au lieu de tout arrêter
                     backToKeepAliveMode()
                 }
 
                 else -> {
-                    Log.d(TAG, "État non géré: ${state?.name}")
+                    Log.d(TAG, "État: ${state?.name}")
                 }
             }
         }
@@ -69,42 +66,36 @@ class CallService : CoreService() {
             state: RegistrationState?,
             message: String
         ) {
-            Log.i(TAG, "Registration state: ${state?.name} - $message")
+            Log.i(TAG, "🔐 Registration: ${state?.name}")
         }
     }
 
     override fun onCreate() {
         super.onCreate()
-        Log.i(TAG, "CallService created")
+        Log.i(TAG, "🚀 Service démarré")
 
-        // CRITICAL: Créer les canaux de notification IMMÉDIATEMENT
         createAllNotificationChannels()
-
-        // CRITICAL: Démarrer en foreground IMMÉDIATEMENT pour éviter le crash
         startKeepAliveForegroundImmediately()
 
-        // Ajouter le listener après
         try {
             val core = (iCondoVoip as ICondoLinphoneImpl).getCore()
             core.addListener(coreListener)
-            Log.i(TAG, "Listener ajouté au core")
+            Log.i(TAG, "✅ Listener configuré")
         } catch (e: Exception) {
-            Log.e(TAG, "Erreur lors de l'ajout du listener: $e")
+            Log.e(TAG, "❌ Erreur listener: $e")
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i(TAG, "onStartCommand called with action: ${intent?.action}")
+        Log.i(TAG, "📨 Action: ${intent?.action}")
 
-        // CRITICAL: Si on n'est pas encore en foreground, le faire immédiatement
         if (!isInForeground) {
             startKeepAliveForegroundImmediately()
         }
 
         when (intent?.action) {
             ACTION_START_CALL_SERVICE -> {
-                Log.i(TAG, "Keep alive service requested")
-                // Déjà géré dans onCreate/onStartCommand
+                Log.i(TAG, "Keep-alive activé")
             }
 
             ACTION_ANSWER_CALL -> {
@@ -116,8 +107,7 @@ class CallService : CoreService() {
             }
 
             null -> {
-                // Cas où Linphone démarre le service automatiquement
-                Log.i(TAG, "Service démarré automatiquement par Linphone")
+                Log.i(TAG, "Service auto-démarré")
             }
         }
 
@@ -125,68 +115,114 @@ class CallService : CoreService() {
     }
 
     private fun createAllNotificationChannels() {
-        Log.i(TAG, "Création des canaux de notification")
+        Log.i(TAG, "📢 Création des canaux de notification")
 
-        // Canal pour les appels entrants (haute priorité)
+        // Canal appels entrants - Haute priorité
         createNotificationChannel(
-            channelId,
-            "Appels entrants",
-            NotificationManager.IMPORTANCE_HIGH
+            channelId = channelId,
+            name = "Appels entrants",
+            description = "Notifications pour les appels VoIP entrants",
+            importance = NotificationManager.IMPORTANCE_HIGH,
+            enableVibration = true,
+            enableSound = false
         )
 
-        // Canal pour le service keep-alive (basse priorité)
+        // Canal appel en cours - Priorité normale
         createNotificationChannel(
-            keepAliveChannelId,
-            "Service VoIP",
-            NotificationManager.IMPORTANCE_LOW
+            channelId = inCallChannelId,
+            name = "Appel en cours",
+            description = "Notification affichée pendant un appel",
+            importance = NotificationManager.IMPORTANCE_DEFAULT,
+            enableVibration = false,
+            enableSound = false
         )
+
+        // Canal service - Basse priorité
+        createNotificationChannel(
+            channelId = keepAliveChannelId,
+            name = "Service VoIP",
+            description = "Service d'écoute pour les appels entrants",
+            importance = NotificationManager.IMPORTANCE_LOW,
+            enableVibration = false,
+            enableSound = false
+        )
+    }
+
+    private fun createNotificationChannel(
+        channelId: String,
+        name: String,
+        description: String,
+        importance: Int,
+        enableVibration: Boolean,
+        enableSound: Boolean
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, name, importance).apply {
+                this.description = description
+                this.enableVibration(enableVibration)
+                if (enableVibration) {
+                    vibrationPattern = longArrayOf(0, 500, 200, 500)
+                }
+                if (!enableSound) {
+                    setSound(null, null)
+                }
+            }
+
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+            Log.i(TAG, "✅ Canal créé: $name")
+        }
     }
 
     private fun startKeepAliveForegroundImmediately() {
         if (isInForeground) {
-            Log.d(TAG, "Déjà en foreground, skip")
+            Log.d(TAG, "⏭️ Déjà en foreground")
             return
         }
 
-        Log.i(TAG, "Démarrage IMMÉDIAT du service foreground")
+        Log.i(TAG, "🟢 Démarrage service foreground")
 
         val notification = NotificationCompat.Builder(this, keepAliveChannelId)
             .setSmallIcon(R.drawable.ic_call_notification)
-            .setContentTitle("Service VoIP")
-            .setContentText("En attente d'appels...")
+            .setContentTitle("Service d'appels")
+            .setContentText("Prêt à recevoir des appels")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setOngoing(true)
             .setAutoCancel(false)
+            .setShowWhen(false)
+            .setSilent(true)
             .build()
 
         try {
             startForeground(KEEP_ALIVE_FOR_THIRD_PARTY_ACCOUNTS_ID, notification)
             isInForeground = true
-            Log.i(TAG, "Service démarré en foreground avec succès")
+            Log.i(TAG, "✅ Service foreground actif")
         } catch (e: Exception) {
-            Log.e(TAG, "ERREUR lors du démarrage foreground: $e")
+            Log.e(TAG, "❌ Erreur foreground: $e")
         }
     }
 
     private fun showIncomingCallNotification(call: Call) {
-        Log.i(TAG, "Affichage notification appel entrant")
+        Log.i(TAG, "📞 Notification appel entrant")
 
         val callerName = call.remoteAddress?.displayName
             ?: call.remoteAddress?.username
-            ?: "Appel entrant"
-        val phoneNumber = call.remoteAddress?.username
-            ?: call.remoteAddress?.asStringUriOnly()
-            ?: "Numéro inconnu"
+            ?: "Inconnu"
 
-        // Intent pour répondre - Lance CallingActivity
+        val phoneNumber = formatPhoneNumber(
+            call.remoteAddress?.username
+                ?: call.remoteAddress?.asStringUriOnly()
+                ?: ""
+        )
+
+        // Intent pour répondre
         val answerIntent = Intent(this, CallingActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra("incoming_call", true)
             putExtra("caller_name", callerName)
             putExtra("caller_number", phoneNumber)
-            putExtra("auto_answer", true) // Répondre automatiquement une fois l'activité ouverte
+            putExtra("answer", true)
             action = "ANSWER_CALL"
         }
 
@@ -195,7 +231,7 @@ class CallService : CoreService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Intent pour refuser - Reste un service
+        // Intent pour refuser
         val declineIntent = Intent(this, CallService::class.java).apply {
             action = ACTION_DECLINE_CALL
         }
@@ -206,23 +242,17 @@ class CallService : CoreService() {
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_call_notification)
-            .setContentTitle(callerName)
-            .setContentText("Appel entrant")
+            .setContentTitle("Appel entrant")
+            .setContentText(callerName)
             .setSubText(phoneNumber)
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setAutoCancel(false)
             .setOngoing(true)
-            .setSound(null) // Géré ailleurs
-            .setVibrate(longArrayOf(0, 1000, 1000, 1000))
-            .addAction(
-                NotificationCompat.Action.Builder(
-                    R.drawable.ic_call_accept,
-                    "Répondre",
-                    answerPendingIntent // Lance CallingActivity
-                ).build()
-            )
+            .setSound(null)
+            .setVibrate(longArrayOf(0, 500, 200, 500, 200, 500))
+            .setLights(0xFF00FF00.toInt(), 1000, 1000)
             .addAction(
                 NotificationCompat.Action.Builder(
                     R.drawable.ic_call_reject,
@@ -230,170 +260,157 @@ class CallService : CoreService() {
                     declinePendingIntent
                 ).build()
             )
-            // PAS de fullScreenIntent pour éviter le lancement automatique
-            .setContentIntent(answerPendingIntent) // Clic sur la notification = répondre
-            .setTimeoutAfter(60000)
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_call_accept,
+                    "Répondre",
+                    answerPendingIntent
+                ).build()
+            )
+            .setContentIntent(answerPendingIntent)
+            .setTimeoutAfter(60000) // 60 secondes
+            .setColor(0xFF4CAF50.toInt()) // Vert pour appel entrant
             .build()
 
         startForeground(2, notification)
-
-        // SUPPRIMER cette partie qui lance automatiquement l'activité :
-        /*
-        try {
-            startActivity(callingActivityIntent)
-            Log.i(TAG, "CallingActivity lancée directement")
-        } catch (e: Exception) {
-            Log.e(TAG, "Erreur lors du lancement de CallingActivity: $e")
-        }
-        */
-
-        Log.i(TAG, "Notification affichée, en attente de l'action utilisateur")
+        Log.i(TAG, "✅ Notification affichée: $callerName")
     }
 
     private fun showInCallNotification(call: Call) {
-        Log.i(TAG, "Affichage notification appel en cours")
+        Log.i(TAG, "📱 Notification appel en cours")
 
-        val callerName = call.remoteAddress?.displayName ?: "En cours"
-        val phoneNumber = call.remoteAddress?.asStringUriOnly() ?: ""
+        val callerName = call.remoteAddress?.displayName
+            ?: call.remoteAddress?.username
+            ?: "En cours"
 
+        val phoneNumber = formatPhoneNumber(
+            call.remoteAddress?.username
+                ?: call.remoteAddress?.asStringUriOnly()
+                ?: ""
+        )
+
+        val duration = call.duration // En secondes
+        val durationText = formatCallDuration(duration)
+
+        // Intent pour ouvrir l'activité d'appel
+        val openCallIntent = Intent(this, CallingActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+        val openCallPendingIntent = PendingIntent.getActivity(
+            this, 103, openCallIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Intent pour raccrocher
         val hangUpIntent = Intent(this, CallService::class.java).apply {
             action = ACTION_DECLINE_CALL
         }
         val hangUpPendingIntent = PendingIntent.getService(
-            this, 2, hangUpIntent,
+            this, 104, hangUpIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(this, channelId)
+        val notification = NotificationCompat.Builder(this, inCallChannelId)
             .setSmallIcon(R.drawable.ic_call_notification)
             .setContentTitle("Appel en cours")
-            .setContentText("$callerName - $phoneNumber")
-            .addAction(R.drawable.ic_call_reject, "Raccrocher", hangUpPendingIntent)
-            .setOngoing(true)
+            .setContentText("$callerName${if (phoneNumber.isNotEmpty()) " • $phoneNumber" else ""}")
+            .setSubText(durationText)
             .setCategory(NotificationCompat.CATEGORY_CALL)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setOngoing(true)
             .setAutoCancel(false)
+            .setShowWhen(true)
+            .setUsesChronometer(true)
+            .setWhen(System.currentTimeMillis() - (duration * 1000))
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_call_reject,
+                    "Raccrocher",
+                    hangUpPendingIntent
+                ).build()
+            )
+            .setContentIntent(openCallPendingIntent)
+            .setColor(0xFF2196F3.toInt()) // Bleu pour appel en cours
+            .setSilent(true)
             .build()
 
         startForeground(notificationId + 1, notification)
+        Log.i(TAG, "✅ Notification en cours mise à jour")
     }
 
     private fun handleAnswerCall() {
-        Log.i(TAG, "Action 'Répondre' depuis la notification - Lancement de CallingActivity")
+        Log.i(TAG, "✅ Réponse à l'appel")
 
-        // Lancer CallingActivity avec réponse automatique
         val callingActivityIntent = Intent(this, CallingActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra("incoming_call", true)
-            putExtra("auto_answer", true)
+            putExtra("answer", true)
             action = "ANSWER_CALL"
         }
 
         try {
             startActivity(callingActivityIntent)
-            Log.i(TAG, "CallingActivity lancée depuis la notification")
+            Log.i(TAG, "📱 Interface d'appel lancée")
         } catch (e: Exception) {
-            Log.e(TAG, "Erreur lors du lancement de CallingActivity: $e")
-            // En cas d'erreur, répondre quand même depuis le service
-           iCondoVoip.answerCall()
+            Log.e(TAG, "❌ Erreur lancement interface: $e")
+            iCondoVoip.answerCall()
         }
     }
 
     private fun handleDeclineCall() {
-        Log.i(TAG, "Refus de l'appel")
+        Log.i(TAG, "❌ Refus de l'appel")
         iCondoVoip.hangUp()
     }
 
     private fun backToKeepAliveMode() {
-        Log.i(TAG, "Retour au mode keep-alive")
+        Log.i(TAG, "🔄 Retour au mode veille")
         startKeepAliveForegroundImmediately()
     }
 
-    private fun createNotificationChannel(channelId: String, name: String, importance: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, name, importance).apply {
-                if (importance == NotificationManager.IMPORTANCE_HIGH) {
-                    // Pour les appels entrants
-                    enableVibration(true)
-                    setSound(null, null) // Vous pouvez ajouter un son personnalisé
-                } else {
-                    // Pour le service keep-alive
-                    setSound(null, null)
-                    enableVibration(false)
-                }
-            }
+    private fun formatPhoneNumber(phoneNumber: String): String {
+        // Nettoyer le numéro SIP pour n'afficher que le numéro
+        return phoneNumber
+            .removePrefix("sip:")
+            .substringBefore("@")
+            .trim()
+    }
 
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-            Log.i(TAG, "Canal de notification créé: $channelId")
+    private fun formatCallDuration(seconds: Int): String {
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+        return when {
+            minutes > 0 -> "${minutes}m ${remainingSeconds}s"
+            else -> "${seconds}s"
         }
     }
 
     override fun onDestroy() {
-        Log.i(TAG, "CallService destroyed")
+        Log.i(TAG, "🛑 Service arrêté")
         isInForeground = false
 
         try {
             val core = (iCondoVoip as ICondoLinphoneImpl).getCore()
             core.removeListener(coreListener)
-            Log.i(TAG, "Listener supprimé du core")
+            Log.i(TAG, "✅ Listener supprimé")
         } catch (e: Exception) {
-            Log.e(TAG, "Erreur lors de la suppression du listener: $e")
+            Log.e(TAG, "❌ Erreur suppression listener: $e")
         }
         super.onDestroy()
     }
 
     // Implémentation des méthodes abstraites de CoreService
     override fun createServiceNotificationChannel() {
-        // Déjà fait dans createAllNotificationChannels()
-        Log.d(TAG, "createServiceNotificationChannel() appelée")
+        Log.d(TAG, "📢 createServiceNotificationChannel()")
     }
 
     override fun showForegroundServiceNotification(isVideoCall: Boolean) {
-        Log.d(TAG, "showForegroundServiceNotification() appelée - isVideoCall: $isVideoCall")
-        // Notre gestion personnalisée dans onCallStateChanged
+        Log.d(TAG, "📱 showForegroundServiceNotification() - Video: $isVideoCall")
     }
 
     override fun hideForegroundServiceNotification() {
-        Log.d(TAG, "hideForegroundServiceNotification() appelée")
+        Log.d(TAG, "🔇 hideForegroundServiceNotification()")
         backToKeepAliveMode()
-    }
-
-    private fun createIncomingCallNotification(
-        context: Context,
-        channelId: String,
-        callerName: String,
-        phoneNumber: String,
-        acceptCallIntent: PendingIntent,
-        rejectCallIntent: PendingIntent
-    ): Notification {
-
-        val acceptAction = NotificationCompat.Action.Builder(
-            R.drawable.ic_call_accept,
-            context.getString(R.string.accept_call),
-            acceptCallIntent
-        ).build()
-
-        val rejectAction = NotificationCompat.Action.Builder(
-            R.drawable.ic_call_reject,
-            context.getString(R.string.reject_call),
-            rejectCallIntent
-        ).build()
-
-        return NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_call_notification)
-            .setContentTitle(callerName)
-            .setContentText(phoneNumber)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(false)
-            .setOngoing(true)
-            .addAction(acceptAction)
-            .addAction(rejectAction)
-            .setTimeoutAfter(60000)
-            .setFullScreenIntent(acceptCallIntent, true) // Pour affichage plein écran
-            .build()
     }
 
     companion object {
