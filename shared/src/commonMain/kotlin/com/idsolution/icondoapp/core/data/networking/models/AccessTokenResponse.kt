@@ -1,6 +1,5 @@
 package com.idsolution.icondoapp.core.data.networking.models
 
-
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -8,12 +7,14 @@ import kotlinx.serialization.Serializable
 data class AccessTokenResponse(
     @SerialName("access_token")
     val accessToken: String,
+    @SerialName("token_type")
+    val tokenType: String,
+    @SerialName("refresh_token")
+    val refreshToken: String? = null,  // ✅ AJOUTER CETTE LIGNE
     @SerialName("expires_in")
     val expiresIn: Int,
-    @SerialName("jti")
-    val jti: String,
     @SerialName("scope")
     val scope: String,
-    @SerialName("token_type")
-    val tokenType: String
+    @SerialName("jti")
+    val jti: String? = null
 )
