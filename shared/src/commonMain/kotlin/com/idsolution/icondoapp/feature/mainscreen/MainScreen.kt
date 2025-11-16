@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +42,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.testkmpapp.feature.ssh.presenter.places.PlacesScreen
 import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
+import com.idsolution.icondoapp.feature.rtsp.presenter.CameraScreen
 import com.idsolution.icondoapp.feature.voip.NativeVoipScreen
 import com.idsolution.icondoapp.feature.voip.VoipViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -84,19 +84,20 @@ fun MainScreen(
                             composable("voip") {
                                 val voipViewModel: VoipViewModel = koinViewModel()
                                 val state = voipViewModel.state.collectAsState().value
-                                LaunchedEffect(Unit){
+                                LaunchedEffect(Unit) {
                                     voipViewModel.getPhonebook()
                                 }
-                                LaunchedEffect(state){
-                                    if(state is com.idsolution.icondoapp.core.data.networking.Result.Error){
+                                LaunchedEffect(state) {
+                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Error) {
                                         snackbarHostState.showSnackbar(state.error.toString())
                                     }
                                 }
-                                val listPhoneBook = if(state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
-                                    state.data
-                                } else {
-                                    emptyList()
-                                }
+                                val listPhoneBook =
+                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
+                                        state.data
+                                    } else {
+                                        emptyList()
+                                    }
                                 println("listPhoneBook: $state")
                                 NativeVoipScreen(phoneBook = listPhoneBook)
                             }
@@ -104,16 +105,8 @@ fun MainScreen(
                     }
 
                     2 -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Button(onClick = { onLogout.invoke() }) {
-                                Text("Deconnexion")
-                            }
-                        }
+                        CameraScreen()
                     }
-
                 }
             }
         }
