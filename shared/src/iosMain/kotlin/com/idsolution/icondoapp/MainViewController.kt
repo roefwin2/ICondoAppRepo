@@ -5,6 +5,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ComposeUIViewController
 import com.example.testkmpapp.feature.mainscreen.NavigationRoot
 import com.idsolution.icondoapp.NativeVoipLogin
+import com.idsolution.icondoapp.feature.rtsp.LocalRtspPlayerFactory
+import com.idsolution.icondoapp.feature.rtsp.RtspPlayerFactory
 import platform.UIKit.UIAlertAction
 import platform.UIKit.UIAlertActionStyleDefault
 import platform.UIKit.UIAlertController
@@ -44,10 +46,11 @@ val LocalVoipLoginFactory = staticCompositionLocalOf<NativeVoipLogin> {
 fun MainViewController(
     viewController: UIViewController,
     nativeViewFactory: NativeViewFactory,
+    rtspPlayerFactory: RtspPlayerFactory
 ) = ComposeUIViewController(configure = {
     enforceStrictPlistSanityCheck = false
 }) {
-    CompositionLocalProvider(LocalNativeViewFactory provides nativeViewFactory) {
+    CompositionLocalProvider(LocalNativeViewFactory provides nativeViewFactory, LocalRtspPlayerFactory provides rtspPlayerFactory) {
         NavigationRoot(onIncomingCall = {}, onErrorLogin = { errormsg ->
             iOSNativeViewFactory(viewController).showAlert("Erreur de connexion", errormsg)
         })

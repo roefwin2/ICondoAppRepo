@@ -1,6 +1,5 @@
 package com.idsolution.icondoapp.feature.rtsp
 
-// androidMain/kotlin/VlcRtspPlayer.android.kt
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
@@ -221,28 +220,5 @@ actual fun RtspPlayer(
                 }
             }
         }
-    }
-}
-
-// Controller
-private class VlcPlayerController(
-    private val player: MediaPlayer
-) : RtspPlayerController(player)
-
-actual open class RtspPlayerController(private val player: MediaPlayer) {
-    actual fun play() {
-        player.play()
-    }
-
-    actual fun pause() {
-        player.pause()
-    }
-
-    actual fun stop() {
-        player.stop()
-    }
-
-    actual fun release() {
-        player.release()
     }
 }

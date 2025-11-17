@@ -8,11 +8,3 @@ expect fun RtspPlayer(
     rtspUrl: String,
     modifier: Modifier = Modifier
 )
-
-// Interface commune pour contrôler le lecteur
-expect class RtspPlayerController {
-    fun play()
-    fun pause()
-    fun stop()
-    fun release()
-}
