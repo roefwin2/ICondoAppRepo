@@ -1,6 +1,7 @@
 package com.example.testkmpapp.feature.ssh.domain.models
 
 data class CondoSite(
+    val siteId : Int,
     val siteName: String,
     val host: String,
     val port: Int,

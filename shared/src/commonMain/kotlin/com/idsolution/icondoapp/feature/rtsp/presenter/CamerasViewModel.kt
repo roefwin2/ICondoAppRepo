@@ -1,5 +1,6 @@
 package com.idsolution.icondoapp.feature.rtsp.presenter
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
@@ -17,15 +18,24 @@ data class CameraState(
     val selectedCamera: Camera? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isFullScreen: Boolean = false
+    val isFullScreen: Boolean = false,
+    val siteId: Int = 0,
+    val siteName: String = ""
 )
 
 class CameraViewModel(
     private val repository: CondoSSHRepository,
-    private val siteId: Int
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CameraState())
+
+    private val siteId: Int = savedStateHandle.get<Int>("siteId")?: 0
+    private val siteName: String = savedStateHandle.get<String>("siteName") ?: ""
+
+    private val _state = MutableStateFlow(CameraState(
+        siteId = siteId,
+        siteName = siteName
+    ))
     val state: StateFlow<CameraState> = _state.asStateFlow()
 
     init {

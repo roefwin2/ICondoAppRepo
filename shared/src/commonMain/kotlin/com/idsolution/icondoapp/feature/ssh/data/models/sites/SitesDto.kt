@@ -17,7 +17,8 @@ data class SitesDto(
 fun SitesDto.toDomain(): List<CondoSite> {
     return sites.map {
         CondoSite(
-            it.siteName,
+            siteId = it.siteId,
+            siteName = it.siteName,
             host = it.sitePublicIP ?: "",
             port = it.sitePublicPort ?: 0,
             doors = it.siteLobbyDoors?.run {
