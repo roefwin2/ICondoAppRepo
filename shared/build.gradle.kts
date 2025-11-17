@@ -62,6 +62,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.koin.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)

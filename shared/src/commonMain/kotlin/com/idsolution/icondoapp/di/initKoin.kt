@@ -8,6 +8,7 @@ import com.example.testkmpapp.feature.auth.presentation.di.mainViewModelModule
 import com.example.testkmpapp.feature.ssh.data.di.sshDataModule
 import com.example.testkmpapp.feature.ssh.domain.di.sshDomainModule
 import com.example.testkmpapp.feature.ssh.presenter.di.sshViewModelModule
+import com.idsolution.icondoapp.feature.rtsp.di.cameraModule
 import com.idsolution.icondoapp.feature.voip.di.voipViewModelModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -24,6 +25,7 @@ fun initKoin(config: KoinAppDeclaration? = null) {
             sshDataModule,
             sshDomainModule,
             sshViewModelModule,
+            cameraModule,
             platformModule,
             voipModule,
             voipViewModelModule,

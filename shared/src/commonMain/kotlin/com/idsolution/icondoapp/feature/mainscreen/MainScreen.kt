@@ -105,7 +105,11 @@ fun MainScreen(
                     }
 
                     2 -> {
-                        CameraScreen()
+                        CameraScreen(
+                            siteId = 1,
+                            siteName = "Fitz",
+                            onBack = {}
+                        )
                     }
                 }
             }

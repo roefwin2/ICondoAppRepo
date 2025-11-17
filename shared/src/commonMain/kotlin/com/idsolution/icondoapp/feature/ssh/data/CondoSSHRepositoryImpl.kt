@@ -8,11 +8,14 @@ import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result
+import com.idsolution.icondoapp.feature.ssh.data.models.cameras.CamerasResponseDto
+import com.idsolution.icondoapp.feature.ssh.data.models.cameras.toDomain
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.PhoneBookDtoItem
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.toDomain
 import com.idsolution.icondoapp.feature.ssh.data.models.sites.DoorNameDto
 import com.idsolution.icondoapp.feature.ssh.data.models.sites.SitesDto
 import com.idsolution.icondoapp.feature.ssh.data.models.sites.toDomain
+import com.idsolution.icondoapp.feature.ssh.domain.models.Camera
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorName
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
 import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
@@ -410,15 +413,15 @@ class CondoSSHRepositoryImpl(
             }
         }
 
-    override suspend fun getCamera(siteId: String): Result<String, DataError.Network> =
+    override suspend fun getCameras(siteId: Int): Result<List<Camera>, DataError.Network> =
         withContext(Dispatchers.IO) {
-            println("📷 Getting camera for site: $siteId")
+            println("📷 Getting cameras for site: $siteId")
 
-            var response = httpClient.get(urlString = "https://api.i-dsolution.com/camera") {
-                setBody(siteId)
-            }
+            var response = httpClient.get(
+                urlString = "https://api.i-dsolution.com/camera?siteId=$siteId"
+            )
 
-            println("📥 getCamera response status: ${response.status}")
+            println("📥 getCameras response status: ${response.status}")
 
             // ✅ Gérer le 403/401
             if (response.status.value == 403 || response.status.value == 401) {
@@ -426,11 +429,11 @@ class CondoSSHRepositoryImpl(
 
                 when (val refreshResult = authRepository.refreshToken()) {
                     is Result.Success -> {
-                        println("✅ Token refreshed - Retrying getCamera")
-                        response = httpClient.get(urlString = "https://api.i-dsolution.com/camera") {
-                            setBody(siteId)
-                        }
-                        println("📥 Retry getCamera response status: ${response.status}")
+                        println("✅ Token refreshed - Retrying getCameras")
+                        response = httpClient.get(
+                            urlString = "https://api.i-dsolution.com/cameras?site_id=$siteId"
+                        )
+                        println("📥 Retry getCameras response status: ${response.status}")
                     }
                     is Result.Error -> {
                         println("❌ Token refresh failed")
@@ -443,10 +446,12 @@ class CondoSSHRepositoryImpl(
             }
 
             if (response.status.isSuccess()) {
-                println("✅ Camera retrieved successfully")
-                Result.Success(response.body<String>().toString())
+                val json = Json { ignoreUnknownKeys = true }
+                val camerasResponse = json.decodeFromString<CamerasResponseDto>(response.body())
+                println("✅ Cameras retrieved: ${camerasResponse.cameras.size} cameras")
+                Result.Success(camerasResponse.toDomain())
             } else {
-                println("❌ getCamera failed: ${response.status}")
+                println("❌ getCameras failed: ${response.status}")
                 Result.Error(
                     DataError.Network.SERVER_ERROR,
                     "${response.call.request.url} : ${response.status.description}"

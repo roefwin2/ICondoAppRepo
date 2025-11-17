@@ -5,6 +5,7 @@ import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.PhoneBookDtoItem
+import com.idsolution.icondoapp.feature.ssh.domain.models.Camera
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorName
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
 import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
@@ -36,5 +37,5 @@ interface CondoSSHRepository {
     fun getDoorStatus(siteName: String): Flow<Result<List<DoorStatus>, DataError.Network>>
     suspend fun getDoorsName(siteName: String): Result<List<DoorName>, DataError.Network>
 
-    suspend fun getCamera(siteId: String): Result<String, DataError.Network>
+    suspend fun getCameras(siteId: Int): Result<List<Camera>, DataError.Network>
 }
