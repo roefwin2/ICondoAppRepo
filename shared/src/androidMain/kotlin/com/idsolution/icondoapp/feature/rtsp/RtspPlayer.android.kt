@@ -40,6 +40,7 @@ actual fun RtspPlayer(
         ))
 
         val player = MediaPlayer(vlc)
+        player.volume = 0
 
         vlc to player
     }
