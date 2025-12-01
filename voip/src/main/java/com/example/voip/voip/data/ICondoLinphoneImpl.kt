@@ -523,14 +523,67 @@ class ICondoLinphoneImpl(private val context: Context,private val voipEventHandl
         voipEventHandler?.onDoorOpenRequested()
     }
 
-    override fun logout() {
-        Log.i(TAG, "📴 LOGGING OUT")
-        val serviceIntent = Intent(context, CallService::class.java)
-        context.stopService(serviceIntent)
+    // Dans ICondoLinphoneImpl.kt - Mettre à jour la méthode logout()
 
+    override fun logout() {
+        Log.i(TAG, "📴 LOGGING OUT - Full cleanup")
+
+        // 1. Terminer tout appel en cours
+        val currentCall = core.currentCall ?: core.calls.firstOrNull()
+        currentCall?.let {
+            try {
+                Log.i(TAG, "📞 Terminating active call before logout")
+                it.terminate()
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error terminating call: $e")
+            }
+        }
+
+        // 2. Se désinscrire du serveur SIP
+        core.defaultAccount?.let { account ->
+            val params = account.params.clone()
+            params?.isRegisterEnabled = false
+            account.params = params
+            Log.i(TAG, "🔓 Unregistering from SIP server")
+        }
+
+        // 3. Arrêter le service foreground
+        stopKeepAliveService()
+
+        // 4. Supprimer le listener
         core.removeListener(coreListener)
+        Log.i(TAG, "🔇 Core listener removed")
+
+        // 5. Nettoyer les comptes
+        core.clearAccounts()
+        core.clearAllAuthInfo()
+        Log.i(TAG, "🧹 Accounts and auth info cleared")
+
+        // 6. Arrêter le core
         core.stop()
+        Log.i(TAG, "⏹️ Core stopped")
+
+        // 7. Réinitialiser l'état
+        _accountState.value = null
+        _callState.value = ICondoCall()
+
+        Log.i(TAG, "✅ VoIP logout complete")
     }
+
+    /**
+     * Arrête le service de keep-alive
+     */
+    private fun stopKeepAliveService() {
+        Log.i(TAG, "🛑 Stopping keep-alive service")
+        try {
+            val serviceIntent = Intent(context, CallService::class.java)
+            context.stopService(serviceIntent)
+            Log.i(TAG, "✅ Keep-alive service stopped")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error stopping service: $e")
+        }
+    }
+
 }
 
 data class AccountState(

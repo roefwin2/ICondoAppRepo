@@ -106,12 +106,42 @@ class CallService : CoreService() {
                 handleDeclineCall()
             }
 
+            ACTION_LOGOUT -> {
+                handleLogout()
+            }
+
             null -> {
                 Log.i(TAG, "Service auto-démarré")
             }
         }
 
         return START_STICKY
+    }
+
+    /**
+     * Gère la déconnexion complète du service
+     */
+    private fun handleLogout() {
+        Log.i(TAG, "📴 Handling logout - stopping service")
+
+        try {
+            // Terminer tout appel en cours
+            val core = (iCondoVoip as? ICondoLinphoneImpl)?.getCore()
+            core?.currentCall?.terminate()
+
+            // Supprimer le listener
+            core?.removeListener(coreListener)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error during logout cleanup: $e")
+        }
+
+        // Arrêter le service
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        isInForeground = false
+        stopSelf()
+
+        Log.i(TAG, "✅ Service stopped for logout")
     }
 
     private fun createAllNotificationChannels() {
@@ -390,12 +420,19 @@ class CallService : CoreService() {
         isInForeground = false
 
         try {
-            val core = (iCondoVoip as ICondoLinphoneImpl).getCore()
-            core.removeListener(coreListener)
-            Log.i(TAG, "✅ Listener supprimé")
+            // Vérifier si le core est toujours valide avant de supprimer le listener
+            val linphone = iCondoVoip as? ICondoLinphoneImpl
+            if (linphone != null) {
+                val core = linphone.getCore()
+                if (core.globalState != org.linphone.core.GlobalState.Off) {
+                    core.removeListener(coreListener)
+                    Log.i(TAG, "✅ Listener supprimé")
+                }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "❌ Erreur suppression listener: $e")
         }
+
         super.onDestroy()
     }
 
@@ -417,6 +454,7 @@ class CallService : CoreService() {
         const val ACTION_START_CALL_SERVICE = "com.example.condo.ACTION_START_CALL_SERVICE"
         const val ACTION_ANSWER_CALL = "action_answer_call"
         const val ACTION_DECLINE_CALL = "action_decline_call"
+        const val ACTION_LOGOUT = "action_logout"
         const val KEEP_ALIVE_FOR_THIRD_PARTY_ACCOUNTS_ID = 5
     }
 }

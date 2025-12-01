@@ -7,6 +7,9 @@ import com.example.voip.voip.presenter.call.CallViewModel
 import com.example.voip.voip.presenter.call.activities.VideoCallViewModel
 import com.example.voip.voip.presenter.contacts.ContactsViewModel
 import com.idsolution.icondoapp.feature.voip.VoipEventHandlerImpl
+import com.idsolution.icondoapp.feature.voip.VoipLogout
+import com.idsolution.icondoapp.feature.voip.VoipLogoutListener
+import com.idsolution.icondoapp.feature.voip.VoipLogoutListenerImpl
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -29,4 +32,11 @@ actual val voipModule: Module
             VoipEventHandlerImpl()
         }
         singleOf(::ICondoLinphoneImpl).bind<ICondoVoip>()
+        single<VoipLogoutListener>(createdAtStart = true) {
+            val linphone = get<ICondoVoip>() as ICondoLinphoneImpl
+            VoipLogoutListenerImpl(linphone).also { listener ->
+                VoipLogout.setListener(listener)
+                println("✅ Koin: VoipLogout listener configured with Linphone instance")
+            }
+        }
     }
