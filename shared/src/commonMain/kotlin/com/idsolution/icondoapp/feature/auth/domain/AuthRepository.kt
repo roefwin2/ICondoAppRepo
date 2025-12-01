@@ -12,4 +12,5 @@ interface AuthRepository {
     suspend fun getUser(userName : String): Result<Unit,DataError.Network>
     suspend fun refreshToken(): Result<Unit, DataError.Network>
     fun invalidateToken()
+    suspend fun revokeToken(): Result<Unit, DataError.Network>
 }
