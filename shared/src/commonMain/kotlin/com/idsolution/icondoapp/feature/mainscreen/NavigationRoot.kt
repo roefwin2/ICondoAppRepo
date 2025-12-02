@@ -40,6 +40,22 @@ fun NavigationRoot(
         authSessionManager.checkAuthState()
     }
 
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.Unauthenticated -> {
+                navController.navigate("intro") {
+                    popUpTo(0) { inclusive = true } // Vider tout le back stack
+                }
+            }
+            is AuthState.Authenticated -> {
+                navController.navigate("mainscreen") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+            else -> {}
+        }
+    }
+
     when (authState) {
         is AuthState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -54,7 +70,6 @@ fun NavigationRoot(
                 startDestination = "auth"
             ) {
                 authGGraph(
-                    startDestination = if (authState is AuthState.Authenticated) "mainscreen" else "intro",
                     navController = navController,
                     onIncomingCall = { onIncomingCall.invoke(it) },
                     onErrorLogin = {
@@ -65,9 +80,6 @@ fun NavigationRoot(
                         // Déconnexion
                         coroutineScope.launch {
                             authSessionManager.logout()
-                            navController.navigate("auth") {
-                                popUpTo("intro") { inclusive = true }
-                            }
                         }
                     }
                 )
@@ -77,14 +89,13 @@ fun NavigationRoot(
 }
 
 private fun NavGraphBuilder.authGGraph(
-    startDestination: String,
     navController: NavHostController,
     onIncomingCall: (String) -> Unit,
     onErrorLogin: (String) -> Unit,
     onLogout: () -> Unit
 ) {
     navigation(
-        startDestination = startDestination,
+        startDestination = "intro",
         route = "auth"
     ) {
         composable(route = "intro") {

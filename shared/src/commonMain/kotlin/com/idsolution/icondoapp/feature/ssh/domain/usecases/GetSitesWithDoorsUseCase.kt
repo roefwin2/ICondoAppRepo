@@ -8,10 +8,7 @@ import com.example.testkmpapp.feature.ssh.domain.usecases.StartTunnelUseCase
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorName
-import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
-import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 
 class GetSitesWithDoorsUseCase(
@@ -65,9 +62,13 @@ class GetSitesWithDoorsUseCase(
         // Crée une map pour un accès rapide : id -> doorName
         val doorNameMap = doorNames.associateBy { it.id }
 
-        return doors.map { door ->
-            val newName = doorNameMap[door.number]?.doorName ?: door.name
-            door.copy(name = newName)
+        return doors.mapNotNull { door ->
+            if (doorNameMap.contains(door.number)) {
+                val newName = doorNameMap[door.number]?.doorName ?: door.name
+                door.copy(name = newName)
+            } else {
+                null
+            }
         }
     }
 }

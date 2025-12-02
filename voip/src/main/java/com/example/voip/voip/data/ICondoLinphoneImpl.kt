@@ -524,13 +524,87 @@ class ICondoLinphoneImpl(private val context: Context,private val voipEventHandl
     }
 
     override fun logout() {
-        Log.i(TAG, "📴 LOGGING OUT")
-        val serviceIntent = Intent(context, CallService::class.java)
-        context.stopService(serviceIntent)
+        Log.i(TAG, "📴 ═══════════════════════════════════════")
+        Log.i(TAG, "📴 STARTING VOIP LOGOUT (keeping core alive)")
+        Log.i(TAG, "📴 ═══════════════════════════════════════")
 
-        core.removeListener(coreListener)
-        core.stop()
+        try {
+            // ═══ ÉTAPE 1: Terminer les appels en cours ═══
+            Log.i(TAG, "📴 Step 1: Terminating active calls")
+            core.calls.forEach { call ->
+                try {
+                    Log.i(TAG, "  📞 Terminating call: ${call.remoteAddress?.asStringUriOnly()}")
+                    call.terminate()
+                } catch (e: Exception) {
+                    Log.e(TAG, "  ❌ Error terminating call: $e")
+                }
+            }
+
+            // ═══ ÉTAPE 2: Se désenregistrer du serveur SIP ═══
+            Log.i(TAG, "📴 Step 2: Unregistering from SIP server")
+            core.defaultAccount?.let { account ->
+                try {
+                    val params = account.params.clone()
+                    params?.isRegisterEnabled = false
+                    account.params = params
+                    Log.i(TAG, "  ✅ Unregister request sent")
+                } catch (e: Exception) {
+                    Log.e(TAG, "  ❌ Error unregistering: $e")
+                }
+            }
+
+            // ═══ ÉTAPE 3: Arrêter le service foreground ═══
+            Log.i(TAG, "📴 Step 3: Stopping foreground service")
+            stopKeepAliveService()
+
+            // ═══ ÉTAPE 4: Nettoyer les comptes et auth (SANS arrêter le core) ═══
+            Log.i(TAG, "📴 Step 4: Clearing accounts and auth info")
+            try {
+                core.clearAccounts()
+                core.clearAllAuthInfo()
+                Log.i(TAG, "  ✅ Accounts and auth cleared")
+            } catch (e: Exception) {
+                Log.e(TAG, "  ❌ Error clearing accounts: $e")
+            }
+
+            // ═══ ÉTAPE 5: Réinitialiser les états ═══
+            Log.i(TAG, "📴 Step 5: Resetting state flows")
+            _accountState.value = null
+            _callState.value = ICondoCall()
+
+            // ❌ NE PAS FAIRE: core.stop() - cela détruit le core
+            // ❌ NE PAS FAIRE: core.removeListener(coreListener) - on en a besoin pour le prochain login
+
+            Log.i(TAG, "📴 ═══════════════════════════════════════")
+            Log.i(TAG, "📴 VOIP LOGOUT COMPLETE (core still alive) ✅")
+            Log.i(TAG, "📴 ═══════════════════════════════════════")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "📴 ❌ CRITICAL ERROR during logout: ${e.message}")
+            e.printStackTrace()
+
+            // Fallback: nettoyer ce qu'on peut
+            try {
+                stopKeepAliveService()
+                core.clearAccounts()
+                core.clearAllAuthInfo()
+            } catch (_: Exception) {}
+
+            _accountState.value = null
+            _callState.value = ICondoCall()
+        }
     }
+
+    private fun stopKeepAliveService() {
+        try {
+            val serviceIntent = Intent(context, CallService::class.java)
+            context.stopService(serviceIntent)
+            Log.i(TAG, "  ✅ Keep-alive service stopped")
+        } catch (e: Exception) {
+            Log.e(TAG, "  ❌ Error stopping service: $e")
+        }
+    }
+
 }
 
 data class AccountState(

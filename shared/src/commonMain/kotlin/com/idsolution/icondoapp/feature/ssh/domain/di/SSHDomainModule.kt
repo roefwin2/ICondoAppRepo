@@ -2,6 +2,7 @@ package com.example.testkmpapp.feature.ssh.domain.di
 
 import com.example.testkmpapp.feature.ssh.domain.usecases.OpenDoorUseCase
 import com.example.testkmpapp.feature.ssh.domain.usecases.StartTunnelUseCase
+import com.idsolution.icondoapp.feature.auth.domain.usecases.LogoutUseCase
 import com.idsolution.icondoapp.feature.ssh.domain.usecases.GetPhonebookUseCase
 import com.idsolution.icondoapp.feature.ssh.domain.usecases.GetSitesWithDoorsUseCase
 import org.koin.core.module.dsl.singleOf
@@ -12,4 +13,5 @@ val sshDomainModule = module {
     singleOf(::GetPhonebookUseCase)
     singleOf(::GetSitesWithDoorsUseCase)
     singleOf(::StartTunnelUseCase)
+    singleOf(::LogoutUseCase)
 }

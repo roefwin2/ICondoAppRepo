@@ -45,6 +45,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="com.idsolution.icondoapp.MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -62,6 +63,7 @@
             android:name="com.example.voip.voip.presenter.call.activities.CallingActivity"
             android:exported="true"
             android:label="Calling"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat">
         </activity>
 

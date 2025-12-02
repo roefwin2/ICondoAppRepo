@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.rounded.AccountCircle
@@ -27,8 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,8 +45,6 @@ import androidx.navigation.navArgument
 import com.example.testkmpapp.feature.ssh.presenter.places.PlacesScreen
 import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
 import com.idsolution.icondoapp.feature.rtsp.presenter.CameraScreen
-import com.idsolution.icondoapp.feature.voip.NativeVoipScreen
-import com.idsolution.icondoapp.feature.voip.VoipViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 
@@ -107,40 +104,13 @@ fun MainScreen(
                     }
 
                     1 -> {
-                        // VoIP
-                        NavHost(navController = navController, startDestination = "voip") {
-                            composable("voip") {
-                                val voipViewModel: VoipViewModel = koinViewModel()
-                                val state = voipViewModel.state.collectAsState().value
-
-                                LaunchedEffect(Unit) {
-                                    voipViewModel.getPhonebook()
-                                }
-
-                                LaunchedEffect(state) {
-                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Error) {
-                                        snackbarHostState.showSnackbar(state.error.toString())
-                                    }
-                                }
-
-                                val listPhoneBook =
-                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
-                                        state.data
-                                    } else {
-                                        emptyList()
-                                    }
-
-                                NativeVoipScreen(phoneBook = listPhoneBook)
-                            }
-                        }
-                    }
-
-                    2 -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Button(onClick = { onLogout.invoke() }) {
+                            Button(onClick = {
+                                mainViewModel.logout()
+                            }) {
                                 Text("Deconnexion")
                             }
                         }
@@ -196,16 +166,10 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             onClick = { onTabSelected(0) }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Filled.Build, contentDescription = "Documents") },
-            label = { Text("Calling") },
+            icon = { Icon(Icons.Filled.Logout, contentDescription = "Logout") },
+            label = { Text("Logout") },
             selected = selectedTab == 1,
             onClick = { onTabSelected(1) }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Partager") },
-            label = { Text("Vidéo") },
-            selected = selectedTab == 2,
-            onClick = { onTabSelected(2) }
         )
     }
 }
@@ -213,8 +177,7 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 fun getScreenTitle(index: Int): String {
     return when (index) {
         0 -> "Gestion des Sites"
-        1 -> "Calling"
-        2 -> "Vidéo"
+        1 -> "Logout"
         else -> ""
     }
 }

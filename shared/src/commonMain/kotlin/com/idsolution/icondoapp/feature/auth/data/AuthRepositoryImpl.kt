@@ -16,6 +16,7 @@ import com.idsolution.icondoapp.feature.auth.domain.models.ICondoUser
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.auth.AuthCircuitBreaker
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -265,6 +266,40 @@ class AuthRepositoryImpl(
                     DataError.Network.UNAUTHORIZED,
                     "Failed to refresh token: ${result.status.description}"
                 )
+            }
+        }
+
+    override suspend fun revokeToken(): Result<Unit, DataError.Network> =
+        withContext(Dispatchers.IO) {
+            try {
+                println("🚪 AuthRepositoryImpl: Revoking token...")
+
+                val authInfo = sessionStorage.get()
+                if (authInfo == null || authInfo.accessToken.isEmpty()) {
+                    println("⚠️ No token to revoke")
+                    return@withContext Result.Success(Unit)
+                }
+
+                val result = httpClient.delete(
+                    urlString = "https://api.i-dsolution.com/oauth/token"
+                ) {
+                    contentType(ContentType.Application.Json)
+                    // Le token Bearer est ajouté automatiquement par le plugin Auth
+                }
+
+                if (result.status.isSuccess()) {
+                    println("✅ Token revoked successfully")
+                    Result.Success(Unit)
+                } else {
+                    println("⚠️ Token revocation failed: ${result.status}")
+                    // On ne considère pas ça comme une erreur bloquante
+                    // Le token expirera de toute façon
+                    Result.Success(Unit)
+                }
+            } catch (e: Exception) {
+                println("❌ Token revocation error: ${e.message}")
+                // On retourne Success quand même car le logout local doit continuer
+                Result.Success(Unit)
             }
         }
 

@@ -282,7 +282,6 @@ fun CustomSwitchWithLoading(
                 remainingTimeMs -= 16
             }
             localIsChecked = false
-            onCheckedChange(false)
         }
     }
 
