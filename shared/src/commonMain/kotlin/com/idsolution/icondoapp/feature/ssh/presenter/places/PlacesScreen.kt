@@ -25,10 +25,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.idsolution.icondoapp.core.presentation.helper.Loading
 import com.idsolution.icondoapp.core.presentation.helper.Success
@@ -49,8 +52,6 @@ import com.example.testkmpapp.feature.ssh.domain.models.Door
 import com.example.testkmpapp.feature.ssh.presenter.sites.CondoSitesViewModel
 import com.idsolution.icondoapp.core.data.networking.Error
 import com.idsolution.icondoapp.core.presentation.helper.Idle
-import com.idsolution.icondoapp.feature.ssh.domain.models.DoorStatus
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -60,16 +61,21 @@ import kotlin.math.absoluteValue
 @Composable
 fun PlacesScreen(
     viewModel: CondoSitesViewModel = koinViewModel(),
+    onNavigateToCamera: (siteId: Int, siteName: String) -> Unit = { _, _ -> } // ✅ Ajout callback navigation
 ) {
     val state = viewModel.state.collectAsState().value
 
     when (val res = state.sites) {
         is Loading -> {
-            CircularProgressIndicator()
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
 
         is Success -> {
-            // Afficher votre contenu principal
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,24 +88,51 @@ fun PlacesScreen(
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     items(res.value) { site ->
-                        PlaceCard(site) { open, doorNumber ->
-                            viewModel.onDoorChange(
-                                condoSite = site,
-                                doorNumber = doorNumber,
-                                open = open
-                            )
-                        }
+                        PlaceCard(
+                            site = site,
+                            onDoorChange = { open, doorNumber ->
+                                viewModel.onDoorChange(
+                                    condoSite = site,
+                                    doorNumber = doorNumber,
+                                    open = open
+                                )
+                            },
+                            onCameraClick = {
+                                // ✅ Navigation vers les caméras
+                                onNavigateToCamera(site.siteId, site.siteName)
+                            }
+                        )
                     }
                 }
             }
         }
 
         is com.idsolution.icondoapp.core.presentation.helper.Error -> {
-            // Afficher votre message d'erreur
-            Text(
-                text = "Une erreur est survenue: ${res.errorCause}",
-                color = MaterialTheme.colorScheme.error
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Text(
+                        text = "⚠️",
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Une erreur est survenue",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = res.errorCause ?: "Erreur inconnue",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
 
         is Idle -> {}
@@ -107,23 +140,76 @@ fun PlacesScreen(
 }
 
 @Composable
-fun PlaceCard(site: CondoSite, onChecked: (Boolean, Int) -> Unit) {
+fun PlaceCard(
+    site: CondoSite,
+    onDoorChange: (Boolean, Int) -> Unit,
+    onCameraClick: () -> Unit // ✅ Ajout callback caméra
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = site.siteName,
-                style = MaterialTheme.typography.titleLarge
+            // ✅ En-tête avec nom du site et bouton caméras
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = site.siteName,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Site #${site.siteId}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // ✅ Bouton Caméras
+                FilledTonalButton(
+                    onClick = onCameraClick,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Text("📹")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Caméras")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ✅ Séparateur
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant)
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Section Portes
+            Text(
+                text = "Portes (${site.doors.size})",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Liste des portes
             site.doors.forEach { door ->
                 DoorItem(door) { open ->
-                    onChecked.invoke(open, door.number)
+                    onDoorChange.invoke(open, door.number)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
             }
@@ -135,11 +221,31 @@ fun PlaceCard(site: CondoSite, onChecked: (Boolean, Int) -> Unit) {
 fun DoorItem(door: Door, onChecked: (Boolean) -> Unit) {
     val isChecked = door.isOpen is Success<*> && door.isOpen.value == true
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = SpaceBetween
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = door.name)
-        CustomSwitchWithLoading(isChecked = isChecked, isLoading = door.isOpen is Loading<*>) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = "🚪",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = door.name,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
+        CustomSwitchWithLoading(
+            isChecked = isChecked,
+            isLoading = door.isOpen is Loading<*>
+        ) {
             onChecked.invoke(it)
         }
     }
@@ -151,36 +257,30 @@ fun CustomSwitchWithLoading(
     isLoading: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    // État interne pour suivre la transition
     var localIsChecked by remember { mutableStateOf(isChecked) }
     var remainingTimeMs by remember { mutableStateOf(0L) }
-    val maxTimeMs = 5000L // 5 secondes
+    val maxTimeMs = 5000L
 
-    // Animation de la position du curseur
     val position by animateFloatAsState(
         targetValue = if (localIsChecked) 1f else 0f,
         animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing),
         label = "switchPosition"
     )
 
-    // Animation de la couleur de fond
     val backgroundColor by animateColorAsState(
         targetValue = if (localIsChecked) Color.Green else Color.Gray,
         animationSpec = tween(durationMillis = 300),
         label = "backgroundColor"
     )
 
-    // Effet pour synchroniser l'état local avec l'état externe
     LaunchedEffect(isChecked) {
         localIsChecked = isChecked
         if (isChecked) {
             remainingTimeMs = maxTimeMs
-            // Lancer le compte à rebours
             while (remainingTimeMs > 0) {
-                delay(16) // Rafraîchissement environ 60 fois par seconde
+                kotlinx.coroutines.delay(16)
                 remainingTimeMs -= 16
             }
-            // Après 5 secondes, déclencher la désélection
             localIsChecked = false
             onCheckedChange(false)
         }
@@ -190,12 +290,16 @@ fun CustomSwitchWithLoading(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = if (localIsChecked) "OPEN" else "CLOSE")
+        Text(
+            text = if (localIsChecked) "OPEN" else "CLOSE",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = if (localIsChecked) Color.Green else Color.Gray
+        )
 
-        // Indicateur de progression (optionnel)
         if (localIsChecked && !isLoading) {
             LinearProgressIndicator(
-                progress = 1f - (remainingTimeMs.toFloat() / maxTimeMs),
+                progress = { 1f - (remainingTimeMs.toFloat() / maxTimeMs) },
                 modifier = Modifier.width(30.dp).height(2.dp),
                 color = Color.Red
             )
@@ -234,19 +338,10 @@ fun CustomSwitchWithLoading(
     }
 }
 
-
 @Preview
 @Composable
 fun PlaceCardPreview() {
     MaterialTheme {
-
-    }
-}
-
-@Preview
-@Composable
-fun DoorItemPreview() {
-    MaterialTheme {
-        //DoorItem(Door("Porte Preview", Success(true), 5)) {}
+        // Preview
     }
 }

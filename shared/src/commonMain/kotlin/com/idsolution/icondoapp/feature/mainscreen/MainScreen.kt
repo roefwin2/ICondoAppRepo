@@ -38,11 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.testkmpapp.feature.ssh.presenter.places.PlacesScreen
 import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
+import com.idsolution.icondoapp.feature.rtsp.presenter.CameraScreen
 import com.idsolution.icondoapp.feature.voip.NativeVoipScreen
 import com.idsolution.icondoapp.feature.voip.VoipViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -57,6 +60,8 @@ fun MainScreen(
     var selectedTab by remember { mutableStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // ✅ NavController pour gérer la navigation vers les caméras
+    val navController = rememberNavController()
 
     val mainState = mainViewModel.state.value
     val username = mainState.username
@@ -67,7 +72,6 @@ fun MainScreen(
         bottomBar = { BottomNavigationBar(selectedTab) { selectedTab = it } }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            // Content based on selected tab
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -75,29 +79,57 @@ fun MainScreen(
             ) {
                 when (selectedTab) {
                     0 -> {
-                        PlacesScreen()
+                        // ✅ Navigation pour les sites et caméras
+                        NavHost(
+                            navController = navController,
+                            startDestination = "places"
+                        ) {
+                            composable("places") {
+                                PlacesScreen(
+                                    onNavigateToCamera = { siteId, siteName ->
+                                        navController.navigate("camera/$siteId/$siteName")
+                                    }
+                                )
+                            }
+
+                            composable(
+                                route = "camera/{siteId}/{siteName}",
+                                arguments = listOf(
+                                    navArgument("siteId") { type = NavType.IntType },
+                                    navArgument("siteName") { type = NavType.StringType }
+                                )
+                            ) {
+                                CameraScreen(
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                        }
                     }
 
                     1 -> {
-                        val navController = rememberNavController()
+                        // VoIP
                         NavHost(navController = navController, startDestination = "voip") {
                             composable("voip") {
                                 val voipViewModel: VoipViewModel = koinViewModel()
                                 val state = voipViewModel.state.collectAsState().value
-                                LaunchedEffect(Unit){
+
+                                LaunchedEffect(Unit) {
                                     voipViewModel.getPhonebook()
                                 }
-                                LaunchedEffect(state){
-                                    if(state is com.idsolution.icondoapp.core.data.networking.Result.Error){
+
+                                LaunchedEffect(state) {
+                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Error) {
                                         snackbarHostState.showSnackbar(state.error.toString())
                                     }
                                 }
-                                val listPhoneBook = if(state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
-                                    state.data
-                                } else {
-                                    emptyList()
-                                }
-                                println("listPhoneBook: $state")
+
+                                val listPhoneBook =
+                                    if (state is com.idsolution.icondoapp.core.data.networking.Result.Success) {
+                                        state.data
+                                    } else {
+                                        emptyList()
+                                    }
+
                                 NativeVoipScreen(phoneBook = listPhoneBook)
                             }
                         }
@@ -113,7 +145,6 @@ fun MainScreen(
                             }
                         }
                     }
-
                 }
             }
         }
@@ -139,7 +170,7 @@ fun CustomTopAppBar(title: String, username: String) {
         },
         navigationIcon = {
             Image(
-                imageVector = Icons.Rounded.AccountCircle, // Remplacez par l'image souhaitée
+                imageVector = Icons.Rounded.AccountCircle,
                 contentDescription = "User Image",
                 modifier = Modifier.size(40.dp)
             )
@@ -160,7 +191,7 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     ) {
         NavigationBarItem(
             icon = { Icon(Icons.Filled.Home, contentDescription = "Accueil") },
-            label = { Text("Sites Controller") },
+            label = { Text("Sites") },
             selected = selectedTab == 0,
             onClick = { onTabSelected(0) }
         )
@@ -168,9 +199,7 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             icon = { Icon(Icons.Filled.Build, contentDescription = "Documents") },
             label = { Text("Calling") },
             selected = selectedTab == 1,
-            onClick = {
-                onTabSelected(1)
-            }
+            onClick = { onTabSelected(1) }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Partager") },
@@ -183,7 +212,7 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 
 fun getScreenTitle(index: Int): String {
     return when (index) {
-        0 -> "Site Controller"
+        0 -> "Gestion des Sites"
         1 -> "Calling"
         2 -> "Vidéo"
         else -> ""

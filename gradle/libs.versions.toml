@@ -18,7 +18,7 @@ linphoneSdkIos = "5.2.0"
 navigationCompose = "2.9.0-beta03"
 koin = "4.1.0-Beta6"
 koinComposeMultiplatform = "4.1.0-Beta6"
-lifecycleViewModel = "2.8.2"
+lifecycleViewModel = "2.8.0"
 okhttp = "2.5.0"
 timber = "5.0.1"
 kotlinx-serialization = "1.6.3"
@@ -68,7 +68,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlinx-serialization-json-v160 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycleViewModel"}
+lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewModel"}
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

@@ -44,6 +44,15 @@ kotlin {
             implementation(libs.timber)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.linphone.sdk.android)
+
+            // ExoPlayer avec support RTSP
+            implementation("androidx.media3:media3-exoplayer:1.8.0")
+            implementation("androidx.media3:media3-exoplayer-rtsp:1.8.0")
+            implementation("androidx.media3:media3-ui:1.8.0")
+            implementation("androidx.media3:media3-ui:1.8.0")
+            implementation("androidx.media3:media3-common:1.8.0")
+
+            implementation("org.videolan.android:libvlc-all:3.5.4-eap2")
         }
         commonMain.dependencies {
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
@@ -53,6 +62,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.koin.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)
@@ -63,9 +73,7 @@ kotlin {
             api(libs.datastore.preferences)
             api(libs.datastore)
             implementation(libs.kotlinx.serialization.json.v160)
-            //implementation(libs.webrtc)
             implementation(libs.calf.permissions)
-            //implementation(libs.webrtc.kmp)
             implementation(libs.socket.io)
             implementation(libs.uuid)
 
