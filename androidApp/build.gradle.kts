@@ -14,8 +14,8 @@ android {
         applicationId = "com.idsolution.icondoapp.android"
         minSdk = 24
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.6"
+        versionCode = 8
+        versionName = "1.7"
         // Add NDK configuration
         ndk {
             abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
