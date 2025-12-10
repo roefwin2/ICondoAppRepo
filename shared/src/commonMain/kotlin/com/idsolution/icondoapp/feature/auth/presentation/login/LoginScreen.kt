@@ -12,9 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +48,7 @@ fun LoginScreenRoot(
     onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit,
     onErrorLogin: (String) -> Unit,
+    onBackClick: () -> Unit,
     viewModel: LoginViewModel = koinViewModel(),
 ) {
     val events = viewModel.events.collectAsState(LoginEvent.Idle).value
@@ -69,6 +73,7 @@ fun LoginScreenRoot(
         onAction = { action ->
             when (action) {
                 is LoginAction.OnRegisterClick -> onSignUpClick()
+                is LoginAction.OnBackClick -> onBackClick()
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -88,8 +93,20 @@ private fun LoginScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
                 .padding(vertical = 32.dp)
-                .padding(top = 16.dp)
         ) {
+            // Bouton Back
+            IconButton(
+                onClick = { onAction(LoginAction.OnBackClick) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = "Hi there",
                 fontWeight = FontWeight.SemiBold,

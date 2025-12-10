@@ -1,6 +1,7 @@
 package com.example.testkmpapp.feature.auth.presentation.login
 
 sealed interface LoginAction {
+    data object OnBackClick : LoginAction
     data object OnTogglePasswordVisibility : LoginAction
     data object OnToggleVoipPasswordVisibility : LoginAction
     data object OnLoginClick : LoginAction

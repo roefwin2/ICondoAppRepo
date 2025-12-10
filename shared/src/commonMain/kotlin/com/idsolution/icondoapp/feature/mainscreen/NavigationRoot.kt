@@ -118,6 +118,9 @@ private fun NavGraphBuilder.authGGraph(
                 },
                 onErrorLogin = {
                     onErrorLogin.invoke(it)
+                },
+                onBackClick = {
+                    navController.navigate("intro")
                 }
             )
         }
