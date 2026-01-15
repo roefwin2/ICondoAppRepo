@@ -1,7 +1,5 @@
-package com.idsolution.icondoapp.feature.auth.presentation.di
+package com.idsolution.icondoapp.feature.mainscreen.di
 
-import com.idsolution.icondoapp.feature.auth.presentation.login.LoginViewModel
-import com.idsolution.icondoapp.feature.auth.presentation.createuser.SignupViewModel
 import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
 import org.koin.compose.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module

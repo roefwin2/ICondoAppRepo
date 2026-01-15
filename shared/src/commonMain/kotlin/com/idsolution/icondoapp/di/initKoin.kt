@@ -4,7 +4,7 @@ import com.idsolution.icondoapp.core.data.di.coreDataModule
 import com.idsolution.icondoapp.core.domain.di.coreDomainModule
 import com.idsolution.icondoapp.feature.auth.data.di.authDataModule
 import com.idsolution.icondoapp.feature.auth.presentation.di.authViewModelModule
-import com.idsolution.icondoapp.feature.auth.presentation.di.mainViewModelModule
+import com.idsolution.icondoapp.feature.mainscreen.di.mainViewModelModule
 import com.idsolution.icondoapp.feature.ssh.data.di.sshDataModule
 import com.idsolution.icondoapp.feature.ssh.domain.di.sshDomainModule
 import com.idsolution.icondoapp.feature.ssh.presenter.di.sshViewModelModule

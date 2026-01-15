@@ -16,16 +16,14 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.USE_SIP" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
 
-    <!-- Permissions pour le service microphone -->
+    <!-- Permissions for microphone service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-    <!-- Permissions pour le service d'appel téléphonique -->
+    <!-- Permissions for phone call service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
 
@@ -43,6 +41,7 @@
         android:usesCleartextTraffic="true"
         android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name="com.idsolution.icondoapp.MainActivity"
             android:screenOrientation="portrait"
@@ -52,30 +51,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- VoIP Call Service -->
         <service
-            android:name="com.example.voip.voip.core.notification.CallService"
+            android:name="com.idsolution.icondoapp.feature.voip.service.CallService"
             android:exported="false"
             android:foregroundServiceType="phoneCall|camera|microphone"
             android:stopWithTask="false"
-            android:label="callservice" />
+            android:label="ICondo VoIP Service" />
 
-        <activity
-            android:name="com.example.voip.voip.presenter.call.activities.CallingActivity"
-            android:exported="true"
-            android:label="Calling"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat">
-        </activity>
-
-        <!-- Métadonnées Firebase -->
+        <!-- Firebase Metadata -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_call_notification" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/common_google_signin_btn_text_light" />
+            android:resource="@color/colorPrimary" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="incoming_calls" />
     </application>
-</manifest> 
+</manifest>
