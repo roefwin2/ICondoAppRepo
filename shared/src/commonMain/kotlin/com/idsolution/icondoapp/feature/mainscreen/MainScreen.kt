@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.mainscreen
+package com.idsolution.icondoapp.feature.mainscreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +42,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.testkmpapp.feature.ssh.presenter.places.PlacesScreen
+import com.idsolution.icondoapp.feature.ssh.presenter.places.PlacesScreen
 import com.idsolution.icondoapp.feature.mainscreen.MainViewModel
 import com.idsolution.icondoapp.feature.rtsp.presenter.CameraScreen
 import org.koin.compose.viewmodel.koinViewModel

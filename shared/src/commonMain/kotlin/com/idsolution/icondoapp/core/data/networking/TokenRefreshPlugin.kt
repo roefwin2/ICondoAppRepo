@@ -1,4 +1,4 @@
-package com.example.testkmpapp.core.data.networking
+package com.idsolution.icondoapp.core.data.networking
 
 import com.idsolution.icondoapp.core.data.networking.models.AccessTokenResponse
 import com.idsolution.icondoapp.core.domain.AuthInfo

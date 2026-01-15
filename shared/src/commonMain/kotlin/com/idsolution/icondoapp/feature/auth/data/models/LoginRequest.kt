@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.auth.data.models
+package com.idsolution.icondoapp.feature.auth.data.models
 
 import kotlinx.serialization.Serializable
 

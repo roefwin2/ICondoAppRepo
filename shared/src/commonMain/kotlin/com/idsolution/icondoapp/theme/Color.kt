@@ -1,4 +1,4 @@
-package com.example.testkmpapp.theme
+package com.idsolution.icondoapp.theme
 
 import androidx.compose.ui.graphics.Color
 

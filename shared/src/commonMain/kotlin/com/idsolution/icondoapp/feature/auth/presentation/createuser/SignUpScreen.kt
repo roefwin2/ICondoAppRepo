@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.testkmpapp.theme.CondoTheme
+import com.idsolution.icondoapp.theme.CondoTheme
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoActionButton
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoPasswordTextField
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoTextField

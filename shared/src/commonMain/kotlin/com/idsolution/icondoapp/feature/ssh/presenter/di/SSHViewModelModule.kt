@@ -1,6 +1,6 @@
-package com.example.testkmpapp.feature.ssh.presenter.di
+package com.idsolution.icondoapp.feature.ssh.presenter.di
 
-import com.example.testkmpapp.feature.ssh.presenter.sites.CondoSitesViewModel
+import com.idsolution.icondoapp.feature.ssh.presenter.sites.CondoSitesViewModel
 import org.koin.compose.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 

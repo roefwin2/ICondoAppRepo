@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.ssh.domain.models
+package com.idsolution.icondoapp.feature.ssh.domain.models
 
 import com.idsolution.icondoapp.core.presentation.helper.Resource
 

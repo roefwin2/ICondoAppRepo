@@ -1,6 +1,6 @@
 package com.idsolution.icondoapp.feature.auth.domain.usecases
 
-import com.example.testkmpapp.feature.auth.domain.AuthRepository
+import com.idsolution.icondoapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.feature.auth.domain.AuthSessionManager
 import com.idsolution.icondoapp.feature.voip.VoipLogout

@@ -1,4 +1,4 @@
-package com.example.testkmpapp.theme
+package com.idsolution.icondoapp.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

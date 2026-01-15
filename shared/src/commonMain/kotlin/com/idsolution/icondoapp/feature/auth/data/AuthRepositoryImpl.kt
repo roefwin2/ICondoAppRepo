@@ -1,8 +1,8 @@
-package com.example.testkmpapp.feature.auth.data
+package com.idsolution.icondoapp.feature.auth.data
 
-import com.example.testkmpapp.core.data.networking.invalidateBearerTokens
-import com.example.testkmpapp.feature.auth.data.models.LoginRequest
-import com.example.testkmpapp.feature.auth.domain.AuthRepository
+import com.idsolution.icondoapp.core.data.networking.invalidateBearerTokens
+import com.idsolution.icondoapp.feature.auth.data.models.LoginRequest
+import com.idsolution.icondoapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result

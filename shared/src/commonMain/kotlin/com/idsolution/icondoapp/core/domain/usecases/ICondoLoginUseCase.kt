@@ -2,7 +2,7 @@ package com.idsolution.icondoapp.core.domain.usecases
 
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
-import com.example.testkmpapp.feature.auth.domain.AuthRepository
+import com.idsolution.icondoapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.core.domain.SessionStorage
 import com.idsolution.icondoapp.feature.auth.domain.AuthSessionManager

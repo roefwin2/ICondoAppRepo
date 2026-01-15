@@ -1,10 +1,10 @@
 package com.idsolution.icondoapp.feature.ssh.domain.usecases
 
-import com.example.testkmpapp.feature.auth.domain.AuthRepository
-import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
-import com.example.testkmpapp.feature.ssh.domain.models.Door
-import com.example.testkmpapp.feature.ssh.domain.usecases.StartTunnelUseCase
+import com.idsolution.icondoapp.feature.auth.domain.AuthRepository
+import com.idsolution.icondoapp.feature.ssh.domain.CondoSSHRepository
+import com.idsolution.icondoapp.feature.ssh.domain.models.CondoSite
+import com.idsolution.icondoapp.feature.ssh.domain.models.Door
+import com.idsolution.icondoapp.feature.ssh.domain.usecases.StartTunnelUseCase
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorName

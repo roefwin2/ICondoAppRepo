@@ -42,7 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.testkmpapp.theme.CondoTheme
+import com.idsolution.icondoapp.theme.CondoTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable

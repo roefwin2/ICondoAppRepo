@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.auth.presentation.intro
+package com.idsolution.icondoapp.feature.auth.presentation.intro
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -18,7 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.testkmpapp.theme.CondoTheme
+import com.idsolution.icondoapp.theme.CondoTheme
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoActionButton
 import com.idsolution.icondoapp.core.presentation.designsystem.component.CondoOutlinedActionButton
 import com.idsolution.icondoapp.core.presentation.designsystem.component.GradientBackground

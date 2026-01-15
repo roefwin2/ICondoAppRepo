@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.auth.presentation.login
+package com.idsolution.icondoapp.feature.auth.presentation.login
 
 import com.idsolution.icondoapp.core.presentation.helper.UiText
 
