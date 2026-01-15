@@ -22,6 +22,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ICondo"
-include(":androidApp")
+include(":composeApp")
 include(":shared")
-include(":voip")
