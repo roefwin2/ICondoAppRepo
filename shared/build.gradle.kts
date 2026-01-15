@@ -42,11 +42,9 @@ kotlin {
             isStatic = true
             export("androidx.datastore:datastore-preferences-core:1.1.2")
         }
-        // Linphone SDK for iOS VoIP
-        pod("linphone-sdk") {
-            version = libs.versions.linphoneSdkIos.get()
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
+        // Note: Linphone SDK for iOS is handled directly in the iosApp Podfile
+        // The Kotlin iOS VoIP implementation (IOSVoipService) uses NativeVoipHandler
+        // interface which is implemented in Swift using the Linphone SDK
     }
 
     sourceSets {
