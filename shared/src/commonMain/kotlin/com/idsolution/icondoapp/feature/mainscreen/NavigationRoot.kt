@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.mainscreen
+package com.idsolution.icondoapp.feature.mainscreen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +16,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.example.testkmpapp.feature.auth.presentation.intro.IntroScreenRoot
-import com.example.testkmpapp.feature.auth.presentation.login.LoginScreenRoot
 import com.idsolution.icondoapp.feature.auth.domain.AuthSessionManager
 import com.idsolution.icondoapp.feature.auth.domain.AuthState
 import com.idsolution.icondoapp.feature.auth.presentation.createuser.SignupScreenRoot
+import com.idsolution.icondoapp.feature.auth.presentation.intro.IntroScreenRoot
+import com.idsolution.icondoapp.feature.auth.presentation.login.LoginScreenRoot
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -35,7 +35,7 @@ fun NavigationRoot(
     val authState by authSessionManager.authState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    // Vérifier l'état d'authentification au démarrage
+    // Check auth state on startup
     LaunchedEffect(Unit) {
         authSessionManager.checkAuthState()
     }
@@ -44,7 +44,7 @@ fun NavigationRoot(
         when (authState) {
             is AuthState.Unauthenticated -> {
                 navController.navigate("intro") {
-                    popUpTo(0) { inclusive = true } // Vider tout le back stack
+                    popUpTo(0) { inclusive = true }
                 }
             }
             is AuthState.Authenticated -> {
@@ -69,15 +69,13 @@ fun NavigationRoot(
                 navController = navController,
                 startDestination = "auth"
             ) {
-                authGGraph(
+                authGraph(
                     navController = navController,
                     onIncomingCall = { onIncomingCall.invoke(it) },
                     onErrorLogin = {
-                        // Gérer l'erreur de connexion
                         onErrorLogin.invoke(it)
                     },
                     onLogout = {
-                        // Déconnexion
                         coroutineScope.launch {
                             authSessionManager.logout()
                         }
@@ -88,7 +86,7 @@ fun NavigationRoot(
     }
 }
 
-private fun NavGraphBuilder.authGGraph(
+private fun NavGraphBuilder.authGraph(
     navController: NavHostController,
     onIncomingCall: (String) -> Unit,
     onErrorLogin: (String) -> Unit,
@@ -135,8 +133,7 @@ private fun NavGraphBuilder.authGGraph(
             )
         }
         composable("mainscreen") {
-            MainScreen( onLogout =
-                { onLogout.invoke() })
+            MainScreen(onLogout = { onLogout.invoke() })
         }
     }
 }
