@@ -55,14 +55,14 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.linphone.sdk.android)
 
-            // ExoPlayer with RTSP support
+            // ExoPlayer with RTSP support (primary player for RTSP streams)
             implementation("androidx.media3:media3-exoplayer:1.8.0")
             implementation("androidx.media3:media3-exoplayer-rtsp:1.8.0")
             implementation("androidx.media3:media3-ui:1.8.0")
             implementation("androidx.media3:media3-common:1.8.0")
 
-            // VLC for RTSP fallback
-            implementation("org.videolan.android:libvlc-all:3.5.4-eap2")
+            // Note: VLC removed due to 16KB page size incompatibility on Android 15+
+            // ExoPlayer handles RTSP streams natively
 
             // Media for audio focus
             implementation("androidx.media:media:1.7.0")
