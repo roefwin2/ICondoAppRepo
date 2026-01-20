@@ -1,6 +1,6 @@
 package com.idsolution.icondoapp.feature.auth.domain.models
 
-import com.example.testkmpapp.feature.ssh.domain.models.Door
+import com.idsolution.icondoapp.feature.ssh.domain.models.Door
 
 data class ICondoUser(
     val username : String,

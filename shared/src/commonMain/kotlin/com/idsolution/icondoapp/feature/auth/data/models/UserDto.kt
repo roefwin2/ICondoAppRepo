@@ -1,7 +1,7 @@
 package com.idsolution.icondoapp.feature.auth.data.models
 
 
-import com.example.testkmpapp.feature.ssh.domain.models.Door
+import com.idsolution.icondoapp.feature.ssh.domain.models.Door
 import com.idsolution.icondoapp.core.presentation.helper.Idle
 import com.idsolution.icondoapp.feature.auth.domain.models.ICondoUser
 import kotlinx.serialization.SerialName

@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.auth.domain
+package com.idsolution.icondoapp.feature.auth.domain
 
 interface PatternValidator {
     fun matches(value: String): Boolean

@@ -1,42 +1,34 @@
-package com.example.testkmpapp.di
+package com.idsolution.icondoapp.di
 
-import com.example.voip.voip.data.ICondoLinphoneImpl
-import com.example.voip.voip.domain.ICondoVoip
-import com.example.voip.voip.domain.VoipEventHandler
-import com.example.voip.voip.presenter.call.CallViewModel
-import com.example.voip.voip.presenter.call.activities.VideoCallViewModel
-import com.example.voip.voip.presenter.contacts.ContactsViewModel
-import com.idsolution.icondoapp.feature.voip.VoipEventHandlerImpl
-import com.idsolution.icondoapp.feature.voip.VoipLogout
-import com.idsolution.icondoapp.feature.voip.VoipLogoutListener
-import com.idsolution.icondoapp.feature.voip.VoipLogoutListenerImpl
+import com.idsolution.icondoapp.feature.voip.VoipServiceFactory
+import com.idsolution.icondoapp.feature.voip.VoipViewModel
+import com.idsolution.icondoapp.feature.voip.domain.DefaultVoipEventHandler
+import com.idsolution.icondoapp.feature.voip.domain.VoipEventHandler
+import com.idsolution.icondoapp.feature.voip.domain.VoipService
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
-import org.koin.androidx.viewmodel.dsl.viewModelOf
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
-import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
+/**
+ * Android-specific platform module
+ */
 actual val platformModule: Module
     get() = module {
         single<HttpClientEngine> { OkHttp.create() }
     }
 
+/**
+ * Android VoIP module using Linphone SDK
+ */
 actual val voipModule: Module
     get() = module {
-        viewModelOf(::ContactsViewModel)
-        viewModelOf(::CallViewModel)
-        viewModelOf(::VideoCallViewModel)
-        single<VoipEventHandler> {
-            VoipEventHandlerImpl()
-        }
-        singleOf(::ICondoLinphoneImpl).bind<ICondoVoip>()
-        single<VoipLogoutListener>(createdAtStart = true) {
-            val linphone = get<ICondoVoip>() as ICondoLinphoneImpl
-            VoipLogoutListenerImpl(linphone).also { listener ->
-                VoipLogout.setListener(listener)
-                println("✅ Koin: VoipLogout listener configured with Linphone instance")
-            }
+        // VoIP Event Handler
+        single<VoipEventHandler> { DefaultVoipEventHandler() }
+
+        // VoIP Service - singleton using factory
+        single<VoipService> {
+            VoipServiceFactory.create(get())
         }
     }

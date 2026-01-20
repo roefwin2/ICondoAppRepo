@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.ssh.presenter.places
+package com.idsolution.icondoapp.feature.ssh.presenter.places
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -47,9 +47,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.idsolution.icondoapp.core.presentation.helper.Loading
 import com.idsolution.icondoapp.core.presentation.helper.Success
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
-import com.example.testkmpapp.feature.ssh.domain.models.Door
-import com.example.testkmpapp.feature.ssh.presenter.sites.CondoSitesViewModel
+import com.idsolution.icondoapp.feature.ssh.domain.models.CondoSite
+import com.idsolution.icondoapp.feature.ssh.domain.models.Door
+import com.idsolution.icondoapp.feature.ssh.presenter.sites.CondoSitesViewModel
 import com.idsolution.icondoapp.core.data.networking.Error
 import com.idsolution.icondoapp.core.presentation.helper.Idle
 import org.jetbrains.compose.ui.tooling.preview.Preview

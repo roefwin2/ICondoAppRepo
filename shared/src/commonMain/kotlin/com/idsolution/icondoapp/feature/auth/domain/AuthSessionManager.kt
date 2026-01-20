@@ -1,6 +1,6 @@
 package com.idsolution.icondoapp.feature.auth.domain
 
-import com.example.testkmpapp.feature.auth.domain.AuthRepository
+import com.idsolution.icondoapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.core.domain.SessionStorage
 import com.idsolution.icondoapp.feature.auth.domain.models.ICondoUser
 import kotlinx.coroutines.flow.MutableStateFlow

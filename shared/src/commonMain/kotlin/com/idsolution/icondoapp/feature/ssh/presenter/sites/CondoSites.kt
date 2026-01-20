@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.ssh.presenter.sites
+package com.idsolution.icondoapp.feature.ssh.presenter.sites
 
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -29,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
+import com.idsolution.icondoapp.feature.ssh.domain.models.CondoSite
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

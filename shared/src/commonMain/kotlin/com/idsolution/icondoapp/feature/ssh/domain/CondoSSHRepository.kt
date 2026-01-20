@@ -1,9 +1,9 @@
-package com.example.testkmpapp.feature.ssh.domain
+package com.idsolution.icondoapp.feature.ssh.domain
 
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult
 import com.idsolution.icondoapp.core.data.networking.Result
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
+import com.idsolution.icondoapp.feature.ssh.domain.models.CondoSite
 import com.idsolution.icondoapp.feature.ssh.data.models.phonebook.PhoneBookDtoItem
 import com.idsolution.icondoapp.feature.ssh.domain.models.Camera
 import com.idsolution.icondoapp.feature.ssh.domain.models.DoorName

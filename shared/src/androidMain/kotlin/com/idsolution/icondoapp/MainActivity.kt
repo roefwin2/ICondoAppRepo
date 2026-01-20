@@ -16,31 +16,32 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.example.testkmpapp.feature.mainscreen.NavigationRoot
-import com.example.testkmpapp.theme.CondoTheme
+import com.idsolution.icondoapp.feature.mainscreen.NavigationRoot
+import com.idsolution.icondoapp.theme.CondoTheme
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.linphone.core.tools.service.CoreService
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkAndRequestPermissions(this, this)
         enableEdgeToEdge()
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName"))
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
                 startActivityForResult(intent, 1234)
             }
         }
+
         setContent {
             CondoTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
@@ -68,7 +69,8 @@ class MainActivity : ComponentActivity() {
     private fun showNotification(title: String) {
         val notification = NotificationCompat.Builder(applicationContext, "condo_channel_id")
             .setContentTitle(title)
-            .setContentText("This is a description")
+            .setContentText("Incoming call")
+            .setSmallIcon(android.R.drawable.ic_menu_call)
             .build()
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -95,4 +97,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

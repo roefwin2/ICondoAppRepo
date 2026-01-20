@@ -1,9 +1,9 @@
-package com.example.testkmpapp
+package com.idsolution.icondoapp
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ComposeUIViewController
-import com.example.testkmpapp.feature.mainscreen.NavigationRoot
+import com.idsolution.icondoapp.feature.mainscreen.NavigationRoot
 import com.idsolution.icondoapp.NativeVoipLogin
 import com.idsolution.icondoapp.feature.rtsp.LocalRtspPlayerFactory
 import com.idsolution.icondoapp.feature.rtsp.RtspPlayerFactory

@@ -40,7 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.testkmpapp.theme.CondoTheme
+import com.idsolution.icondoapp.theme.CondoTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 

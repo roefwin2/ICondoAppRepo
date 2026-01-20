@@ -7,6 +7,10 @@ struct ComposeView: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> some UIViewController {
-        MainViewControllerKt.MainViewController(viewController: UIViewController(), nativeViewFactory:IOSNativeViewFactory.shared)
+        MainViewControllerKt.MainViewController(
+            viewController: UIViewController(),
+            nativeViewFactory: IOSNativeViewFactory.shared,
+            rtspPlayerFactory: IOSRtspPlayerFactory.shared
+        )
     }
 }

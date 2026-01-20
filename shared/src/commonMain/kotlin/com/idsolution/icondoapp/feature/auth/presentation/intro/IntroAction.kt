@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.auth.presentation.intro
+package com.idsolution.icondoapp.feature.auth.presentation.intro
 
 sealed interface IntroAction{
     data object OnSignInClick : IntroAction

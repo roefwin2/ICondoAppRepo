@@ -1,7 +1,7 @@
 package com.idsolution.icondoapp.feature.rtsp
 
-import android.net.Uri
 import android.util.Log
+import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,12 +12,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import org.videolan.libvlc.LibVLC
-import org.videolan.libvlc.Media
-import org.videolan.libvlc.MediaPlayer
-import org.videolan.libvlc.util.VLCVideoLayout
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.rtsp.RtspMediaSource
+import androidx.media3.ui.PlayerView
 
-private const val TAG = "VlcRtspPlayer"
+private const val TAG = "ExoRtspPlayer"
 
 @Composable
 actual fun RtspPlayer(
@@ -29,131 +31,130 @@ actual fun RtspPlayer(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var playerState by remember { mutableStateOf("INIT") }
 
-    val (libVLC, mediaPlayer) = remember {
-        Log.d(TAG, "=== Création LibVLC 3.5.4 ===")
-
-        val vlc = LibVLC(context, arrayListOf(
-            "-vvv",
-            "--no-drop-late-frames",
-            "--no-skip-frames",
-            "--rtsp-tcp"
-        ))
-
-        val player = MediaPlayer(vlc)
-        player.volume = 0
-
-        vlc to player
+    val exoPlayer = remember {
+        Log.d(TAG, "=== Creating ExoPlayer for RTSP ===")
+        ExoPlayer.Builder(context).build().apply {
+            playWhenReady = true
+            volume = 0f // Mute by default for RTSP streams (usually security cameras)
+        }
     }
 
-    // Event Listener pour LibVLC 3.x
-    DisposableEffect(mediaPlayer) {
-        val listener = object : MediaPlayer.EventListener {
-            override fun onEvent(event: MediaPlayer.Event) {
-                Log.d(TAG, "VLC Event: ${event.type}")
-
-                when (event.type) {
-                    MediaPlayer.Event.Opening -> {
-                        playerState = "OPENING"
+    // Player event listener
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                when (playbackState) {
+                    Player.STATE_IDLE -> {
+                        playerState = "IDLE"
+                        Log.d(TAG, "State: IDLE")
+                    }
+                    Player.STATE_BUFFERING -> {
+                        playerState = "BUFFERING"
                         isLoading = true
-                        Log.d(TAG, "▶ Opening...")
+                        Log.d(TAG, "State: BUFFERING")
                     }
-                    MediaPlayer.Event.Buffering -> {
-                        val buffer = event.buffering
-                        playerState = "BUFFERING ${buffer.toInt()}%"
-                        isLoading = buffer < 100f
-                        if (buffer >= 100f) {
-                            Log.d(TAG, "✅ Buffering terminé")
-                        }
-                    }
-                    MediaPlayer.Event.Playing -> {
+                    Player.STATE_READY -> {
                         playerState = "PLAYING"
                         isLoading = false
                         errorMessage = null
-                        Log.d(TAG, "✅ PLAYING!")
+                        Log.d(TAG, "State: READY/PLAYING")
                     }
-                    MediaPlayer.Event.Paused -> {
-                        playerState = "PAUSED"
-                        Log.d(TAG, "⏸ Paused")
-                    }
-                    MediaPlayer.Event.Stopped -> {
-                        playerState = "STOPPED"
-                        isLoading = false
-                        Log.d(TAG, "⏹ Stopped")
-                    }
-                    MediaPlayer.Event.EncounteredError -> {
-                        playerState = "ERROR"
-                        isLoading = false
-                        errorMessage = "Erreur de lecture\nVérifiez l'URL et la connexion"
-                        Log.e(TAG, "❌ ERROR")
-                    }
-                    MediaPlayer.Event.EndReached -> {
+                    Player.STATE_ENDED -> {
                         playerState = "ENDED"
-                        Log.d(TAG, "Stream terminé")
-                    }
-                    MediaPlayer.Event.Vout -> {
-                        Log.d(TAG, "🎥 VIDEO OUTPUT! Vout count: ${event.voutCount}")
+                        isLoading = false
+                        Log.d(TAG, "State: ENDED")
                     }
                 }
             }
-        }
 
-        mediaPlayer.setEventListener(listener)
-
-        onDispose {
-            mediaPlayer.setEventListener(null)
-        }
-    }
-
-    // Démarrer lecture
-    LaunchedEffect(rtspUrl) {
-        Log.d(TAG, "Configuration média: $rtspUrl")
-
-        try {
-            val media = Media(libVLC, Uri.parse(rtspUrl)).apply {
-                setHWDecoderEnabled(true, false)
-                addOption(":network-caching=300")
-                addOption(":rtsp-tcp")
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) {
+                    playerState = "PLAYING"
+                    isLoading = false
+                }
+                Log.d(TAG, "isPlaying: $isPlaying")
             }
 
-            mediaPlayer.media = media
-            media.release()
+            override fun onPlayerError(error: PlaybackException) {
+                playerState = "ERROR"
+                isLoading = false
+                errorMessage = when (error.errorCode) {
+                    PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ->
+                        "Connection failed\nCheck network and URL"
+                    PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ->
+                        "Connection timeout\nCheck network connectivity"
+                    PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED ->
+                        "Unsupported format"
+                    else ->
+                        "Playback error\nCode: ${error.errorCode}"
+                }
+                Log.e(TAG, "Player error: ${error.message}", error)
+            }
+        }
 
-            Log.d(TAG, "Démarrage lecture...")
-            mediaPlayer.play()
+        exoPlayer.addListener(listener)
 
-        } catch (e: Exception) {
-            Log.e(TAG, "Erreur configuration", e)
-            errorMessage = "Erreur: ${e.message}"
+        onDispose {
+            exoPlayer.removeListener(listener)
         }
     }
 
-//    // Controller
-//    LaunchedEffect(mediaPlayer) {
-//        onControllerReady?.invoke(VlcPlayerController(mediaPlayer))
-//    }
+    // Start playback
+    LaunchedEffect(rtspUrl) {
+        Log.d(TAG, "Setting up RTSP media: $rtspUrl")
 
+        try {
+            // Create RTSP media source with TCP transport (more reliable)
+            val mediaItem = MediaItem.Builder()
+                .setUri(rtspUrl)
+                .build()
+
+            val rtspMediaSource = RtspMediaSource.Factory()
+                .setForceUseRtpTcp(true) // Use TCP for better reliability
+                .setDebugLoggingEnabled(true)
+                .createMediaSource(mediaItem)
+
+            exoPlayer.setMediaSource(rtspMediaSource)
+            exoPlayer.prepare()
+
+            Log.d(TAG, "Playback prepared, starting...")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up media", e)
+            errorMessage = "Error: ${e.message}"
+            isLoading = false
+        }
+    }
+
+    // Cleanup
     DisposableEffect(Unit) {
         onDispose {
-            Log.d(TAG, "Cleanup")
-            mediaPlayer.stop()
-            mediaPlayer.release()
-            libVLC.release()
+            Log.d(TAG, "Cleanup - releasing ExoPlayer")
+            exoPlayer.release()
         }
     }
 
     Box(modifier = modifier.background(Color.Black)) {
-        // Video Layout
+        // Video View
         AndroidView(
             factory = { ctx ->
-                Log.d(TAG, "Création VLCVideoLayout")
-                VLCVideoLayout(ctx).apply {
-                    mediaPlayer.attachViews(this, null, false, false)
+                Log.d(TAG, "Creating PlayerView")
+                PlayerView(ctx).apply {
+                    player = exoPlayer
+                    useController = false // Hide default controls for security camera view
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            update = { playerView ->
+                playerView.player = exoPlayer
+            }
         )
 
-        // État
+        // Status indicator
         Surface(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -165,7 +166,7 @@ actual fun RtspPlayer(
                 text = playerState,
                 color = when {
                     playerState == "PLAYING" -> Color.Green
-                    playerState.startsWith("BUFFERING") -> Color.Yellow
+                    playerState == "BUFFERING" -> Color.Yellow
                     playerState == "ERROR" -> Color.Red
                     else -> Color.White
                 },
@@ -174,7 +175,7 @@ actual fun RtspPlayer(
             )
         }
 
-        // Loading
+        // Loading indicator
         if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -186,13 +187,13 @@ actual fun RtspPlayer(
                         modifier = Modifier.size(56.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Connexion...", color = Color.White)
+                    Text("Connecting...", color = Color.White)
                     Text(playerState, color = Color.Gray)
                 }
             }
         }
 
-        // Error
+        // Error display
         errorMessage?.let { error ->
             Box(
                 modifier = Modifier
@@ -205,17 +206,21 @@ actual fun RtspPlayer(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(24.dp)
                     ) {
-                        Text("❌ Erreur", color = Color.Red, style = MaterialTheme.typography.headlineMedium)
+                        Text(
+                            "Error",
+                            color = Color.Red,
+                            style = MaterialTheme.typography.headlineMedium
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(error, color = Color.Black)
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(onClick = {
                             errorMessage = null
                             isLoading = true
-                            mediaPlayer.stop()
-                            mediaPlayer.play()
+                            exoPlayer.prepare()
+                            exoPlayer.play()
                         }) {
-                            Text("Réessayer")
+                            Text("Retry")
                         }
                     }
                 }

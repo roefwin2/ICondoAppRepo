@@ -1,9 +1,9 @@
-package com.example.testkmpapp.feature.ssh.presenter.sites
+package com.idsolution.icondoapp.feature.ssh.presenter.sites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
-import com.example.testkmpapp.feature.ssh.domain.usecases.OpenDoorUseCase
+import com.idsolution.icondoapp.feature.ssh.domain.models.CondoSite
+import com.idsolution.icondoapp.feature.ssh.domain.usecases.OpenDoorUseCase
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.core.domain.briges.VoipDoorBridge
 import com.idsolution.icondoapp.core.presentation.helper.Error

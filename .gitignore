@@ -68,17 +68,50 @@ crashlytics-build.properties
 
 # Xcode specific for KMP iOS
 *.xcuserstate
-*.xcworkspace
-*.xcodeproj/project.xcworkspace/xcuserdata
-*.xcodeproj/xcuserdata
-*.xcodeproj/xcshareddata/xcschemes
-*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 DerivedData/
-Pods/
 Carthage/
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 
-# Swi
+# Xcode user-specific data (ignore)
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Keep xcworkspace (needed for CocoaPods)
+!*.xcworkspace/
+# But ignore user-specific workspace settings
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+
+# Keep xcodeproj (needed for build)
+!*.xcodeproj/
+# Keep shared schemes
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/xcshareddata/xcschemes/
+
+# CocoaPods
+# Keep Podfile and Podfile.lock (required for reproducible builds)
+!iosApp/Podfile
+!iosApp/Podfile.lock
+# Ignore Pods directory (can be regenerated with pod install)
+Pods/
+
+# Swift Package Manager
+.build/
+*.resolved
+Package.resolved
+
+# iOS specific
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Provisioning profiles
+*.mobileprovision
+*.provisionprofile
+
+# Preview Content - keep for SwiftUI previews
+!iosApp/iosApp/Preview Content/
 

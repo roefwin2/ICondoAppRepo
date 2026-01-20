@@ -10,7 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import com.example.testkmpapp.theme.CondoTheme
+import com.idsolution.icondoapp.theme.CondoTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable

@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
-import com.example.testkmpapp.LocalNativeViewFactory
+import com.idsolution.icondoapp.LocalNativeViewFactory
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
 

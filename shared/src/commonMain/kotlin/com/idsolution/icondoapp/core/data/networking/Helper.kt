@@ -1,6 +1,6 @@
 package com.idsolution.icondoapp.core.data.networking
 
-import com.example.testkmpapp.core.data.networking.CONDO_URL
+import com.idsolution.icondoapp.core.data.networking.CONDO_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post

@@ -19,14 +19,22 @@ kotlin {
             }
         }
     }
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "shared"
+            isStatic = true
+        }
+    }
 
     cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
+        summary = "ICondo Shared Module - Compose Multiplatform"
+        homepage = "https://github.com/idsolution/icondo"
+        version = "2.0"
         ios.deploymentTarget = "16.0"
         podfile = project.file("../iosApp/Podfile")
         framework {
@@ -34,26 +42,32 @@ kotlin {
             isStatic = true
             export("androidx.datastore:datastore-preferences-core:1.1.2")
         }
+        // Note: Linphone SDK for iOS is handled directly in the iosApp Podfile
+        // The Kotlin iOS VoIP implementation (IOSVoipService) uses NativeVoipHandler
+        // interface which is implemented in Swift using the Linphone SDK
     }
 
     sourceSets {
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
-            //timber
             implementation(libs.timber)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.linphone.sdk.android)
 
-            // ExoPlayer avec support RTSP
+            // ExoPlayer with RTSP support (primary player for RTSP streams)
             implementation("androidx.media3:media3-exoplayer:1.8.0")
             implementation("androidx.media3:media3-exoplayer-rtsp:1.8.0")
             implementation("androidx.media3:media3-ui:1.8.0")
-            implementation("androidx.media3:media3-ui:1.8.0")
             implementation("androidx.media3:media3-common:1.8.0")
 
-            implementation("org.videolan.android:libvlc-all:3.5.4-eap2")
+            // Note: VLC removed due to 16KB page size incompatibility on Android 15+
+            // ExoPlayer handles RTSP streams natively
+
+            // Media for audio focus
+            implementation("androidx.media:media:1.7.0")
         }
+
         commonMain.dependencies {
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
             implementation(compose.runtime)
@@ -76,14 +90,14 @@ kotlin {
             implementation(libs.calf.permissions)
             implementation(libs.socket.io)
             implementation(libs.uuid)
+        }
 
-            commonTest.dependencies {
-                implementation(libs.kotlin.test)
-            }
-            iosMain.dependencies {
-                implementation(libs.ktor.client.darwin)
-                // Vous pouvez ajouter ici des dépendances spécifiques si nécessaires pour Linphone
-            }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
     }
 }
@@ -108,10 +122,4 @@ android {
             )
         )
     }
-}
-dependencies {
-    implementation(project(":voip"))
-    // Latest version is 5.0.x, using + to get the latest available
-    implementation(libs.linphone.sdk.android)
-    implementation(libs.firebase.messaging.ktx)
 }

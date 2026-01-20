@@ -1,9 +1,9 @@
-package com.example.testkmpapp.feature.ssh.domain.usecases
+package com.idsolution.icondoapp.feature.ssh.domain.usecases
 
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.Result
-import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
-import com.example.testkmpapp.feature.ssh.domain.models.CondoSite
+import com.idsolution.icondoapp.feature.ssh.domain.CondoSSHRepository
+import com.idsolution.icondoapp.feature.ssh.domain.models.CondoSite
 import kotlinx.coroutines.delay
 
 class StartTunnelUseCase(

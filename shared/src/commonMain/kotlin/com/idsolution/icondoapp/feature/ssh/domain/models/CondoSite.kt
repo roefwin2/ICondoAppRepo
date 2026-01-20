@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.ssh.domain.models
+package com.idsolution.icondoapp.feature.ssh.domain.models
 
 data class CondoSite(
     val siteId : Int,

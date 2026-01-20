@@ -1,4 +1,4 @@
-package com.example.testkmpapp
+package com.idsolution.icondoapp
 
 import com.idsolution.icondoapp.feature.ssh.domain.models.PhoneBook
 import platform.UIKit.UIViewController

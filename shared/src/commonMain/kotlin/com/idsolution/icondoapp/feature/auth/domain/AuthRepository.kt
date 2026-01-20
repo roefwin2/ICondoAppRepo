@@ -1,4 +1,4 @@
-package com.example.testkmpapp.feature.auth.domain
+package com.idsolution.icondoapp.feature.auth.domain
 
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.EmptyDataResult

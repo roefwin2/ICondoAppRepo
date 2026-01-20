@@ -2,7 +2,7 @@ package com.idsolution.icondoapp.feature.mainscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.testkmpapp.feature.auth.domain.AuthRepository
+import com.idsolution.icondoapp.feature.auth.domain.AuthRepository
 import com.idsolution.icondoapp.feature.auth.domain.usecases.LogoutUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

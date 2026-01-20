@@ -1,4 +1,4 @@
-package com.example.testkmpapp.core.data.auth
+package com.idsolution.icondoapp.core.data.auth
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

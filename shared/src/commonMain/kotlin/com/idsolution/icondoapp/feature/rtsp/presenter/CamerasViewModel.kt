@@ -3,7 +3,7 @@ package com.idsolution.icondoapp.feature.rtsp.presenter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.testkmpapp.feature.ssh.domain.CondoSSHRepository
+import com.idsolution.icondoapp.feature.ssh.domain.CondoSSHRepository
 import com.idsolution.icondoapp.core.data.networking.DataError
 import com.idsolution.icondoapp.core.data.networking.Result
 import com.idsolution.icondoapp.feature.ssh.domain.models.Camera
