@@ -1,15 +1,18 @@
 PODS:
   - linphone-sdk (5.3.9)
+  - MobileVLCKit (3.6.0)
   - shared (2.0)
   - WebRTC-SDK (125.6422.05)
 
 DEPENDENCIES:
   - linphone-sdk (= 5.3.9)
+  - MobileVLCKit (~> 3.6.0)
   - shared (from `../shared`)
   - WebRTC-SDK (= 125.6422.05)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
+    - MobileVLCKit
     - WebRTC-SDK
   https://gitlab.linphone.org/BC/public/podspec.git:
     - linphone-sdk
@@ -20,9 +23,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   linphone-sdk: b87987efbde78be108ccd5171467cc26dd8ac32a
+  MobileVLCKit: 8fe98ae53b7464f32e4bdf527cc7d53053e4d3a5
   shared: 14ce8d4cae84b7b640f8a65a7e522149b169a326
   WebRTC-SDK: 1990a1a595bd0b59c17485ce13ff17f575732c12
 
-PODFILE CHECKSUM: 29934fb2378588ccb9f235d3d1d35c4be506f100
+PODFILE CHECKSUM: b144843b512c9a884b49331ce2d879bfd92201bd
 
 COCOAPODS: 1.16.2

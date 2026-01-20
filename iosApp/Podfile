@@ -8,6 +8,9 @@ target 'iosApp' do
   pod 'WebRTC-SDK', '125.6422.05'
 
   pod 'linphone-sdk', '5.3.9'
+
+  # VLC for RTSP streaming
+  pod 'MobileVLCKit', '~> 3.6.0'
 end
 
 # Remove test frameworks from linphone-sdk that are not available in production builds
