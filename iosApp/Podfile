@@ -9,3 +9,45 @@ target 'iosApp' do
 
   pod 'linphone-sdk', '5.3.9'
 end
+
+# Remove test frameworks from linphone-sdk that are not available in production builds
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      # Remove test frameworks from OTHER_LDFLAGS
+      if config.build_settings['OTHER_LDFLAGS']
+        ldflags = config.build_settings['OTHER_LDFLAGS']
+        if ldflags.is_a?(Array)
+          ldflags.reject! { |flag|
+            flag.include?('linphonetester') ||
+            flag.include?('limetester') ||
+            flag.include?('bctoolbox-tester') ||
+            flag.include?('exampleplugin')
+          }
+        elsif ldflags.is_a?(String)
+          ldflags = ldflags.gsub(/-framework\s+"?linphonetester"?/, '')
+                          .gsub(/-framework\s+"?limetester"?/, '')
+                          .gsub(/-framework\s+"?bctoolbox-tester"?/, '')
+                          .gsub(/-framework\s+"?exampleplugin"?/, '')
+          config.build_settings['OTHER_LDFLAGS'] = ldflags
+        end
+      end
+
+      # iOS deployment target
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+    end
+  end
+
+  # Also update the generated xcconfig files
+  Dir.glob(File.join(installer.sandbox.root, 'Target Support Files', '**', '*.xcconfig')).each do |xcconfig_path|
+    xcconfig = File.read(xcconfig_path)
+
+    # Remove test framework references
+    xcconfig = xcconfig.gsub(/-framework\s+"?linphonetester"?\s*/, '')
+                       .gsub(/-framework\s+"?limetester"?\s*/, '')
+                       .gsub(/-framework\s+"?bctoolbox-tester"?\s*/, '')
+                       .gsub(/-framework\s+"?exampleplugin"?\s*/, '')
+
+    File.write(xcconfig_path, xcconfig)
+  end
+end
