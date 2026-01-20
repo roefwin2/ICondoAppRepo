@@ -16,10 +16,15 @@
 		F8CA87AA2DA315E200146B0E /* belle-sip.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8F14B802D8DD09A00509280 /* belle-sip.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F8CA87AB2DA31BAE00146B0E /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FFE6D0C0CD491CB7F4272EDA /* Pods_iosApp.framework */; };
 		F8F14B742D8DA4C700509280 /* SimpleIOSView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F14B732D8DA4C700509280 /* SimpleIOSView.swift */; };
-		F8F14B772D8DBE7800509280 /* LinphoneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F14B762D8DBE7800509280 /* LinphoneCall.swift */; };
-		F8F14B792D8DBED000509280 /* LinphoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F14B782D8DBED000509280 /* LinphoneView.swift */; };
 		F8F14B7D2D8DCF7200509280 /* linphonesw.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8F14B7A2D8DCEBA00509280 /* linphonesw.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F8F14B822D8DD0DC00509280 /* belle-sip.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8F14B802D8DD09A00509280 /* belle-sip.xcframework */; };
+		F8VOIP0012DB0000000001 /* LinphoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8VOIP0012DB0000000002 /* LinphoneManager.swift */; };
+		F8VOIP0012DB0000000003 /* CallKitProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8VOIP0012DB0000000004 /* CallKitProviderDelegate.swift */; };
+		F8VOIP0012DB0000000005 /* VoIPPushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8VOIP0012DB0000000006 /* VoIPPushManager.swift */; };
+		F8VOIP0012DB0000000007 /* VoipLoginListenerImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8VOIP0012DB0000000008 /* VoipLoginListenerImpl.swift */; };
+		F8UI0012DB0000000001 /* CallScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8UI0012DB0000000002 /* CallScreen.swift */; };
+		F8UI0012DB0000000003 /* ContactsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8UI0012DB0000000004 /* ContactsScreen.swift */; };
+		F8RTSP012DB0000000001 /* IOSRtspPlayerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8RTSP012DB0000000002 /* IOSRtspPlayerFactory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,11 +55,16 @@
 		F8CA879C2DA2F47800146B0E /* bctoolbox.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = bctoolbox.xcframework; path = "Pods/linphone-sdk/linphone-sdk/apple-darwin/XCFrameworks/bctoolbox.xcframework"; sourceTree = "<group>"; };
 		F8CA87A02DA2F55900146B0E /* limetester.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = limetester.xcframework; path = "Pods/linphone-sdk/linphone-sdk/apple-darwin/XCFrameworks/limetester.xcframework"; sourceTree = "<group>"; };
 		F8F14B732D8DA4C700509280 /* SimpleIOSView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleIOSView.swift; sourceTree = "<group>"; };
-		F8F14B762D8DBE7800509280 /* LinphoneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinphoneCall.swift; sourceTree = "<group>"; };
-		F8F14B782D8DBED000509280 /* LinphoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinphoneView.swift; sourceTree = "<group>"; };
 		F8F14B7A2D8DCEBA00509280 /* linphonesw.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = linphonesw.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8F14B802D8DD09A00509280 /* belle-sip.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = "belle-sip.xcframework"; path = "Pods/linphone-sdk/linphone-sdk/apple-darwin/XCFrameworks/belle-sip.xcframework"; sourceTree = "<group>"; };
 		FFE6D0C0CD491CB7F4272EDA /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F8VOIP0012DB0000000002 /* LinphoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinphoneManager.swift; sourceTree = "<group>"; };
+		F8VOIP0012DB0000000004 /* CallKitProviderDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitProviderDelegate.swift; sourceTree = "<group>"; };
+		F8VOIP0012DB0000000006 /* VoIPPushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoIPPushManager.swift; sourceTree = "<group>"; };
+		F8VOIP0012DB0000000008 /* VoipLoginListenerImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipLoginListenerImpl.swift; sourceTree = "<group>"; };
+		F8UI0012DB0000000002 /* CallScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallScreen.swift; sourceTree = "<group>"; };
+		F8UI0012DB0000000004 /* ContactsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsScreen.swift; sourceTree = "<group>"; };
+		F8RTSP012DB0000000002 /* IOSRtspPlayerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSRtspPlayerFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,13 +110,15 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
-				F8F14B752D8DBE0A00509280 /* Linphone */,
+				F8VOIP0012DB0000000010 /* VoIP */,
+				F8UI0012DB0000000010 /* UI */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* ComposeView.swift */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				2152FB032600AC8F00CF470E /* iOSApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				F8F14B732D8DA4C700509280 /* SimpleIOSView.swift */,
+				F8RTSP012DB0000000002 /* IOSRtspPlayerFactory.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -123,13 +135,24 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		F8F14B752D8DBE0A00509280 /* Linphone */ = {
+		F8VOIP0012DB0000000010 /* VoIP */ = {
 			isa = PBXGroup;
 			children = (
-				F8F14B762D8DBE7800509280 /* LinphoneCall.swift */,
-				F8F14B782D8DBED000509280 /* LinphoneView.swift */,
+				F8VOIP0012DB0000000002 /* LinphoneManager.swift */,
+				F8VOIP0012DB0000000004 /* CallKitProviderDelegate.swift */,
+				F8VOIP0012DB0000000006 /* VoIPPushManager.swift */,
+				F8VOIP0012DB0000000008 /* VoipLoginListenerImpl.swift */,
 			);
-			path = Linphone;
+			path = VoIP;
+			sourceTree = "<group>";
+		};
+		F8UI0012DB0000000010 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				F8UI0012DB0000000002 /* CallScreen.swift */,
+				F8UI0012DB0000000004 /* ContactsScreen.swift */,
+			);
+			path = UI;
 			sourceTree = "<group>";
 		};
 		FC31355ECC8686366DF3128F /* Pods */ = {
@@ -314,9 +337,14 @@
 			files = (
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				F8F14B742D8DA4C700509280 /* SimpleIOSView.swift in Sources */,
-				F8F14B792D8DBED000509280 /* LinphoneView.swift in Sources */,
-				F8F14B772D8DBE7800509280 /* LinphoneCall.swift in Sources */,
 				7555FF83242A565900829871 /* ComposeView.swift in Sources */,
+				F8VOIP0012DB0000000001 /* LinphoneManager.swift in Sources */,
+				F8VOIP0012DB0000000003 /* CallKitProviderDelegate.swift in Sources */,
+				F8VOIP0012DB0000000005 /* VoIPPushManager.swift in Sources */,
+				F8VOIP0012DB0000000007 /* VoipLoginListenerImpl.swift in Sources */,
+				F8UI0012DB0000000001 /* CallScreen.swift in Sources */,
+				F8UI0012DB0000000003 /* ContactsScreen.swift in Sources */,
+				F8RTSP012DB0000000001 /* IOSRtspPlayerFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,8 +496,6 @@
 					"-framework",
 					"\"bctoolbox-ios\"",
 					"-framework",
-					"\"bctoolbox-tester\"",
-					"-framework",
 					"\"belcard\"",
 					"-framework",
 					"\"belle-sip\"",
@@ -478,12 +504,9 @@
 					"-framework",
 					"\"lime\"",
 					"-framework",
-					"\"limetester\"",
-					"-framework",
 					"\"linphone\"",
 					"-framework",
 					"\"linphonesw\"",
-					"-framework",
 					"-framework",
 					"\"mediastreamer2\"",
 					"-framework",
@@ -536,8 +559,6 @@
 					"-framework",
 					"\"bctoolbox-ios\"",
 					"-framework",
-					"\"bctoolbox-tester\"",
-					"-framework",
 					"\"belcard\"",
 					"-framework",
 					"\"belle-sip\"",
@@ -546,12 +567,9 @@
 					"-framework",
 					"\"lime\"",
 					"-framework",
-					"\"limetester\"",
-					"-framework",
 					"\"linphone\"",
 					"-framework",
 					"\"linphonesw\"",
-					"-framework",
 					"-framework",
 					"\"mediastreamer2\"",
 					"-framework",

@@ -1,10 +1,10 @@
 PODS:
-  - linphone-sdk (5.4.41)
-  - shared (1.0)
+  - linphone-sdk (5.3.9)
+  - shared (2.0)
   - WebRTC-SDK (125.6422.05)
 
 DEPENDENCIES:
-  - linphone-sdk
+  - linphone-sdk (= 5.3.9)
   - shared (from `../shared`)
   - WebRTC-SDK (= 125.6422.05)
 
@@ -19,10 +19,10 @@ EXTERNAL SOURCES:
     :path: "../shared"
 
 SPEC CHECKSUMS:
-  linphone-sdk: 5cd4639546d94dddcb56e91404be4639a4e76d17
-  shared: 476f8f613e223c690e3b4311f65291534e4fa034
+  linphone-sdk: b87987efbde78be108ccd5171467cc26dd8ac32a
+  shared: 14ce8d4cae84b7b640f8a65a7e522149b169a326
   WebRTC-SDK: 1990a1a595bd0b59c17485ce13ff17f575732c12
 
-PODFILE CHECKSUM: fb1ba8a7c2af9c18defa1b21b7910f90bfec3eb0
+PODFILE CHECKSUM: 29934fb2378588ccb9f235d3d1d35c4be506f100
 
 COCOAPODS: 1.16.2
