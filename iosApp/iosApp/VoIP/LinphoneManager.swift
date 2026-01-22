@@ -3,7 +3,7 @@
 //  iosApp
 //
 //  Gestionnaire principal de Linphone avec support CallKit et video
-//  Refactored from CallKitExampleContext following best practices
+//  Implements NativeVoipHandler from Kotlin common code for KMP synchronization
 //
 
 import Foundation
@@ -11,10 +11,12 @@ import SwiftUI
 import linphonesw
 import Combine
 import AVFoundation
+import shared
 
 /// Gestionnaire principal pour les appels VoIP via Linphone SDK
+/// Implements NativeVoipHandler for KMP interop
 /// Gere la connexion SIP, les appels entrants/sortants, et l'integration CallKit
-final class LinphoneManager: ObservableObject {
+final class LinphoneManager: ObservableObject, NativeVoipHandler {
 
     // MARK: - Singleton
 
@@ -373,19 +375,6 @@ final class LinphoneManager: ObservableObject {
 
     // MARK: - Call Controls
 
-    func toggleVideo() {
-        guard let call = core.currentCall else { return }
-
-        do {
-            let params = try core.createCallParams(call: call)
-            params.videoEnabled = !isVideoEnabled
-            try call.update(params: params)
-            print("[LinphoneManager] Video toggled")
-        } catch {
-            print("[LinphoneManager] Failed to toggle video: \(error)")
-        }
-    }
-
     func switchCamera() {
         let devices = core.videoDevicesList
 
@@ -411,21 +400,6 @@ final class LinphoneManager: ObservableObject {
             print("[LinphoneManager] Camera switched to: \(nextDevice)")
         } catch {
             print("[LinphoneManager] Failed to switch camera: \(error)")
-        }
-    }
-
-    func toggleSpeaker() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            if isSpeakerEnabled {
-                try session.overrideOutputAudioPort(.none)
-            } else {
-                try session.overrideOutputAudioPort(.speaker)
-            }
-            isSpeakerEnabled.toggle()
-            print("[LinphoneManager] Speaker: \(isSpeakerEnabled)")
-        } catch {
-            print("[LinphoneManager] Failed to toggle speaker: \(error)")
         }
     }
 
@@ -477,5 +451,114 @@ final class LinphoneManager: ObservableObject {
         let params = account.params?.clone()
         params?.registerEnabled = false
         account.params = params
+    }
+
+    // MARK: - NativeVoipHandler Protocol (KMP)
+
+    /// Initialize the VoIP stack (called from Kotlin)
+    func initialize() {
+        print("[LinphoneManager] NativeVoipHandler.initialize() - Already initialized in init()")
+    }
+
+    /// Login to SIP server (called from Kotlin)
+    func login(username: String, password: String, domain: String, transport: String) {
+        self.username = username
+        self.password = password
+        self.domain = domain
+
+        // Map transport type
+        switch transport.lowercased() {
+        case "tcp":
+            self.transportType = .Tcp
+        case "tls":
+            self.transportType = .Tls
+        default:
+            self.transportType = .Udp
+        }
+
+        login()
+    }
+
+    /// Logout from SIP server (called from Kotlin)
+    func logout() {
+        logout(completion: nil)
+    }
+
+    /// Make a call to a SIP URI (called from Kotlin)
+    func makeCall(sipUri: String) {
+        makeCall(to: sipUri, withVideo: true)
+    }
+
+    /// Answer an incoming call (called from Kotlin)
+    func answerCall() {
+        acceptCall()
+    }
+
+    /// Hang up the current call (called from Kotlin)
+    func hangUp() {
+        endCall()
+    }
+
+    /// Toggle video on/off (called from Kotlin)
+    func toggleVideo() {
+        guard let call = core.currentCall else { return }
+
+        do {
+            let params = try core.createCallParams(call: call)
+            params.videoEnabled = !isVideoEnabled
+            try call.update(params: params)
+            print("[LinphoneManager] Video toggled")
+        } catch {
+            print("[LinphoneManager] Failed to toggle video: \(error)")
+        }
+    }
+
+    /// Switch between front and back camera (called from Kotlin)
+    func toggleCamera() {
+        switchCamera()
+    }
+
+    /// Pause or resume the current call (called from Kotlin)
+    func pauseOrResume() {
+        guard let call = core.currentCall else { return }
+
+        do {
+            if call.state == .Paused {
+                try call.resume()
+                print("[LinphoneManager] Call resumed")
+            } else if call.state == .StreamsRunning {
+                try call.pause()
+                print("[LinphoneManager] Call paused")
+            }
+        } catch {
+            print("[LinphoneManager] Failed to pause/resume: \(error)")
+        }
+    }
+
+    /// Toggle microphone mute (called from Kotlin)
+    func toggleMute() {
+        toggleMicrophone()
+    }
+
+    /// Toggle speaker output (called from Kotlin)
+    func toggleSpeaker() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            if isSpeakerEnabled {
+                try session.overrideOutputAudioPort(.none)
+            } else {
+                try session.overrideOutputAudioPort(.speaker)
+            }
+            isSpeakerEnabled.toggle()
+            print("[LinphoneManager] Speaker: \(isSpeakerEnabled)")
+        } catch {
+            print("[LinphoneManager] Failed to toggle speaker: \(error)")
+        }
+    }
+
+    /// Clean up and release resources (called from Kotlin)
+    func destroy() {
+        print("[LinphoneManager] NativeVoipHandler.destroy()")
+        logout(completion: nil)
     }
 }

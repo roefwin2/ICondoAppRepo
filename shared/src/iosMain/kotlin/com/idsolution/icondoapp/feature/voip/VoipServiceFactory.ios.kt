@@ -1,9 +1,9 @@
 package com.idsolution.icondoapp.feature.voip
 
+import com.idsolution.icondoapp.feature.voip.domain.NativeVoipHandler
 import com.idsolution.icondoapp.feature.voip.domain.VoipEventHandler
 import com.idsolution.icondoapp.feature.voip.domain.VoipService
 import com.idsolution.icondoapp.feature.voip.service.IOSVoipService
-import com.idsolution.icondoapp.feature.voip.service.NativeVoipHandler
 
 /**
  * iOS implementation of VoipServiceFactory

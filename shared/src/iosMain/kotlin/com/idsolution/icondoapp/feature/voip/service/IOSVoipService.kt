@@ -1,11 +1,13 @@
 package com.idsolution.icondoapp.feature.voip.service
 
 import com.idsolution.icondoapp.feature.voip.domain.CallState
+import com.idsolution.icondoapp.feature.voip.domain.NativeVoipHandler
 import com.idsolution.icondoapp.feature.voip.domain.RegistrationState
 import com.idsolution.icondoapp.feature.voip.domain.VoipAccountState
 import com.idsolution.icondoapp.feature.voip.domain.VoipCallInfo
 import com.idsolution.icondoapp.feature.voip.domain.VoipEventHandler
 import com.idsolution.icondoapp.feature.voip.domain.VoipService
+import com.idsolution.icondoapp.feature.voip.domain.VoipStateCallback
 import com.idsolution.icondoapp.feature.voip.domain.VoipTransportType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,12 +17,12 @@ import kotlinx.coroutines.flow.update
 /**
  * iOS implementation of VoipService using Linphone SDK via CocoaPods
  *
- * This is a stub implementation that can be filled in with actual Linphone iOS calls.
- * The actual Linphone SDK calls need to be made via Swift interop or direct Kotlin/Native bindings.
+ * Uses NativeVoipHandler from commonMain for native Swift interop.
+ * The Swift LinphoneManager implements NativeVoipHandler interface.
  */
 class IOSVoipService(
     private val eventHandler: VoipEventHandler? = null
-) : VoipService {
+) : VoipService, VoipStateCallback {
 
     private val TAG = "[ICondo-VoIP-iOS]"
 
@@ -32,7 +34,7 @@ class IOSVoipService(
     private val _accountState = MutableStateFlow(VoipAccountState())
     override val accountState: StateFlow<VoipAccountState> = _accountState.asStateFlow()
 
-    // Reference to native iOS VoIP handler (will be set from Swift)
+    // Reference to native iOS VoIP handler (set from Swift LinphoneManager)
     private var nativeHandler: NativeVoipHandler? = null
 
     override fun initialize() {
@@ -42,11 +44,7 @@ class IOSVoipService(
         }
 
         println("$TAG Initializing iOS VoIP service")
-
-        // The actual Linphone initialization will be done in Swift
-        // This is called when the app starts
         nativeHandler?.initialize()
-
         isInitialized = true
         println("$TAG iOS VoIP service initialized")
     }
@@ -71,7 +69,6 @@ class IOSVoipService(
     override fun logout() {
         println("$TAG Logging out")
         nativeHandler?.logout()
-
         _accountState.value = VoipAccountState()
         _callState.value = VoipCallInfo()
     }
@@ -142,17 +139,16 @@ class IOSVoipService(
     // ========== Methods called from Swift ==========
 
     /**
-     * Set the native iOS handler (called from Swift at app start)
+     * Set the native iOS handler (called from Swift LinphoneManager at app start)
      */
     fun setNativeHandler(handler: NativeVoipHandler) {
         this.nativeHandler = handler
         println("$TAG Native handler set")
     }
 
-    /**
-     * Update registration state (called from Swift)
-     */
-    fun updateRegistrationState(state: String, message: String, isRegistered: Boolean) {
+    // ========== VoipStateCallback implementation ==========
+
+    override fun onRegistrationStateChanged(state: String, message: String, isRegistered: Boolean) {
         val mappedState = when (state) {
             "none" -> RegistrationState.NONE
             "progress" -> RegistrationState.PROGRESS
@@ -171,10 +167,7 @@ class IOSVoipService(
         }
     }
 
-    /**
-     * Update call state (called from Swift)
-     */
-    fun updateCallState(
+    override fun onCallStateChanged(
         state: String,
         remoteAddress: String?,
         remoteName: String?,
@@ -208,6 +201,21 @@ class IOSVoipService(
         }
     }
 
+    // Legacy methods for backwards compatibility
+    fun updateRegistrationState(state: String, message: String, isRegistered: Boolean) {
+        onRegistrationStateChanged(state, message, isRegistered)
+    }
+
+    fun updateCallState(
+        state: String,
+        remoteAddress: String?,
+        remoteName: String?,
+        isVideoEnabled: Boolean,
+        duration: Long
+    ) {
+        onCallStateChanged(state, remoteAddress, remoteName, isVideoEnabled, duration)
+    }
+
     private fun mapCallState(state: String): CallState {
         return when (state.lowercase()) {
             "idle" -> CallState.IDLE
@@ -230,23 +238,4 @@ class IOSVoipService(
             else -> CallState.IDLE
         }
     }
-}
-
-/**
- * Interface for native iOS VoIP handler
- * Implemented in Swift and passed to IOSVoipService
- */
-interface NativeVoipHandler {
-    fun initialize()
-    fun login(username: String, password: String, domain: String, transport: String)
-    fun logout()
-    fun makeCall(sipUri: String)
-    fun answerCall()
-    fun hangUp()
-    fun toggleVideo()
-    fun toggleCamera()
-    fun pauseOrResume()
-    fun toggleMute()
-    fun toggleSpeaker()
-    fun destroy()
 }
